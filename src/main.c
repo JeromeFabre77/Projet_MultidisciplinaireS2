@@ -1,9 +1,15 @@
-#include "file_writer/file_writer.h"
+#include "interface/interface.h"
 
-int main(int argv, char* argc[]){
+int main(int argv, char *argc[])
+{
 
-    Individual oui = {1};
+    create_window();
 
-    save_individual_in_JSON(&oui);
+    while (1)
+    {
+        actualise_window();
+    }
+
+    free_window();
     return 0;
 }

@@ -1,0 +1,24 @@
+{
+  "name": "projet_multidisciplinaires2",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/JeromeFabre77/Projet_MultidisciplinaireS2.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/JeromeFabre77/Projet_MultidisciplinaireS2/issues"
+  },
+  "homepage": "https://github.com/JeromeFabre77/Projet_MultidisciplinaireS2#readme",
+  "description": "",
+  "dependencies": {
+    "fs": "^0.0.1-security",
+    "puppeteer": "^24.40.0"
+  }
+}

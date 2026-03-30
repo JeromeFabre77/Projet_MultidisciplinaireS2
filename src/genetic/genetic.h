@@ -17,6 +17,7 @@ typedef struct {
     int bed_count;            /**< Number of available beds in the facility */
     City* location;            /**< The specific city where the hospital is built */
     City* cities;             /**< Array of cities served by this hospital */
+    int cities_size;
 } Hospital;
 
 #endif

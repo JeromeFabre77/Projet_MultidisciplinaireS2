@@ -5,6 +5,8 @@
 #define WIDTH 1224
 #define HEIGHT 768
 
+#include "../individual/individual.h"
+
 void create_window();
 void actualise_window();
 void free_window();

@@ -37,8 +37,8 @@ interface/interface.o: interface/interface.c interface/interface.h genetic/genet
 parser/csv_parser.o: parser/csv_parser.c parser/parser.h city/city.h utils/utils.h
 	$(CC) -c parser/csv_parser.c -o parser/csv_parser.o $(CFLAGS)
 
-file_writer/file_writer.o: file_writer/file_writer.c file_writer/file_writer.h genetic/genetic.h city/city.h
-	$(CC) -c file_writer/file_writer.c -o file_writer/file_writer.o $(CFLAGS)
+file_writer/file_writer.o: file_writer/json_file_writer.c file_writer/file_writer.h genetic/genetic.h city/city.h
+	$(CC) -c file_writer/json_file_writer.c -o file_writer/file_writer.o $(CFLAGS)
 
 clean:
 	rm -f *.o */*.o *~ $(BIN)

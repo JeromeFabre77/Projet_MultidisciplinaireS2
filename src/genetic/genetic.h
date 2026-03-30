@@ -13,9 +13,9 @@
  */
 typedef struct {
     int is_chru;              /**< 1 if located in a city > 80,000 (+4000 in fitness) */
-    long covered_population;  /**< Total population of all cities attached to this hospital */
+    int covered_population;  /**< Total population of all cities attached to this hospital */
     int bed_count;            /**< Number of available beds in the facility */
-    City location;            /**< The specific city where the hospital is built */
+    City* location;            /**< The specific city where the hospital is built */
     City* cities;             /**< Array of cities served by this hospital */
 } Hospital;
 

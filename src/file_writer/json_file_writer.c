@@ -203,9 +203,9 @@ void save_individual_and_cities_in_JSON(char* filepath, Individual* individual, 
                     json_add_key(file, "location");
                     json_start_object(file);
                         json_add_key(file, "latitude");
-                        json_add_double(file, hospital.location.latitude, 1);
+                        json_add_double(file, hospital.location->latitude, 1);
                         json_add_key(file, "longitude");
-                        json_add_double(file, hospital.location.longitude, 0);
+                        json_add_double(file, hospital.location->longitude, 0);
                     json_end_object(file, 0);
                 json_end_object(file, i == individual->hospitals_size-1 ? 0 : 1); /* If it is the last element, has_next has to be 0 */
             }

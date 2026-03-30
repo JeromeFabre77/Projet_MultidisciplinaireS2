@@ -1,3 +1,4 @@
 *.o
 projet_multidisciplinaireS2
 /assets/results
+node_modules/

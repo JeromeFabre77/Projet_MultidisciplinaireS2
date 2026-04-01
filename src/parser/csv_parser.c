@@ -1,27 +1,32 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "parser.h"
 #include "../city/city.h"
 
+/*Evite de tomber sur le champ d'en dessous en cas de malformation du fichier*/
+#define CSV_FIELD_COUNT 10
+/* 4096 pour être safe et afficher 4096 caractères possibles avant de connaitre la taille de la longest line
+et redimensionner le buffer de lecture  */
+#define LINE_READ_CHUNK 4096
+
 /**
- * @brief Opens a CSV file in read mode with error checking
- * @param path Path to the CSV file to open
+ * @brief Ouvre un fichier en mode lecture avec verification d'erreurs
+ * @param path Path to the file to open
  * @return FILE pointer if successful, NULL on failure
- *
- * @note The returned FILE pointer must be closed by the caller using fclose()
- * @note Prints error message to stderr if file cannot be opened
  */
-FILE *open_csv_file(const char *path)
-{
-    if (path == NULL)
-    {
+FILE *open_file(const char *path) {
+    FILE *file;
+
+    /* Verifie que le chemin est valide avant d'ouvrir le fichier. */
+    if (path == NULL) {
         fprintf(stderr, "Error: path is NULL\n");
         return NULL;
     }
 
-    FILE *file = fopen(path, "r");
-    if (file == NULL)
-    {
+    /* Ouvre le fichier en lecture seule. */
+    file = fopen(path, "r");
+    if (file == NULL) {
         fprintf(stderr, "Error: Cannot open file '%s'\n", path);
         return NULL;
     }
@@ -30,20 +35,18 @@ FILE *open_csv_file(const char *path)
 }
 
 /**
- * @brief Safely closes a CSV file with error checking
+ * @brief Ferme un fichier avec verification d'erreurs
  * @param file FILE pointer to close
  * @return 0 on success, EOF on failure
  */
-int close_csv_file(FILE *file)
-{
-    if (file == NULL)
-    {
+int close_file(FILE *file) {
+    /* Un pointeur NULL n'est pas fatal ici: on considere que rien n'est a fermer. */
+    if (file == NULL) {
         fprintf(stderr, "Warning: Attempting to close NULL file pointer\n");
         return 0;
     }
 
-    if (fclose(file) == EOF)
-    {
+    if (fclose(file) == EOF) {
         fprintf(stderr, "Error: Failed to close file\n");
         return EOF;
     }
@@ -52,229 +55,228 @@ int close_csv_file(FILE *file)
 }
 
 /**
- * @brief Gets file statistics in a single pass
+ * @brief Calcule les statistiques du fichier en un seul passage
  * @param path Path to the CSV file
  * @param line_count Pointer to store the line count
  * @param max_length Pointer to store the max line length
  * @return 0 on success, -1 on failure
  */
-int getFileStats(const char *path, int *line_count, int *max_length)
-{
-    FILE *file = open_csv_file(path);
-    if (file == NULL)
+int get_file_stats(const char *path, int *line_count, int *max_length) {
+    FILE *file;
+    char buffer[LINE_READ_CHUNK];
+    int len;
+
+    /* Validation defensive des pointeurs de sortie. */
+    if (line_count == NULL || max_length == NULL) {
+        fprintf(stderr, "Error: NULL pointer in get_file_stats\n");
         return -1;
+    }
+
+    file = open_file(path);
+    if (file == NULL) {
+        return -1;
+    }
 
     *line_count = 0;
     *max_length = 0;
 
-    char buffer[4096];
-    while (fgets(buffer, sizeof(buffer), file) != NULL)
-    {
+    /* Parcours complet pour compter les lignes et trouver la plus longue. */
+    while (fgets(buffer, sizeof(buffer), file) != NULL) {
         (*line_count)++;
-        int len = strlen(buffer);
-        if (len > *max_length)
+        len = (int)strlen(buffer);
+        if (len > *max_length) {
             *max_length = len;
+        }
     }
 
-    close_csv_file(file);
+    if (close_file(file) == EOF) {
+        return -1;
+    }
+
     return 0;
 }
 
 /**
- * @brief Parses a single CSV line and fills a City structure
+ * @brief Parse une ligne CSV et remplit une structure City
  * @param line The CSV line to parse (format: insee,name,region_code,region_name,dept_code,dept_name,postal_code,population,latitude,longitude)
  * @param city Pointer to City structure to fill
  * @return 0 on success, -1 on failure
  */
-int parse_csv_line(const char *line, City *city)
-{
-    if (line == NULL || city == NULL)
-    {
+int parse_csv_line(const char *line, City *city) {
+    char *line_copy;
+    size_t len;
+    char *word;
+    int field_index;
+
+    if (line == NULL || city == NULL) {
         fprintf(stderr, "Error: NULL pointer in parse_csv_line\n");
         return -1;
     }
 
-    /* Create a copy to avoid modifying the original line */
-    char *line_copy = (char *)malloc((strlen(line) + 1) * sizeof(char));
-    if (line_copy == NULL)
-    {
+    /* Copie de travail: strtok modifie la chaine d'entree. */
+    line_copy = (char *)malloc((strlen(line) + 1) * sizeof(char));
+    if (line_copy == NULL) {
         fprintf(stderr, "Error: Memory allocation failed\n");
         return -1;
     }
 
     strcpy(line_copy, line);
 
-    /* Remove trailing newline if present (\n) because fgets adds it */
-    size_t len = strlen(line_copy);
-    if (len > 0 && line_copy[len - 1] == '\n')
-    {
+    /* Supprime le saut de ligne ajoute par fgets. */
+    len = strlen(line_copy);
+    if (len > 0 && line_copy[len - 1] == '\n') {
         line_copy[len - 1] = '\0';
     }
 
-    /* Parse each field separated by comma */
-    char *word = strtok(line_copy, ",");
-    int field_index = 0;
+    /* Decoupage champ par champ. */
+    word = strtok(line_copy, ",");
+    field_index = 0;
 
-    while (word != NULL && field_index < 10)
-    {
-        switch (field_index)
-        {
-        case 0: /* INSEE code */
-            strncpy(city->insee_code, word, 5);
-            city->insee_code[5] = '\0';
+    while (word != NULL && field_index < CSV_FIELD_COUNT) {
+        switch (field_index) {
+        case 0:
+            strncpy(city->insee_code, word, INSEE_CODE_BYTES);
+            city->insee_code[INSEE_CODE_BYTES] = '\0';
             break;
-        case 1: /* City name */
-            strncpy(city->name, word, 63);
-            city->name[63] = '\0';
+        case 1:
+            strncpy(city->name, word, CITY_NAME_BYTES);
+            city->name[CITY_NAME_BYTES] = '\0';
             break;
-        case 2: /* Region code */
-            strncpy(city->region_code, word, 3);
-            city->region_code[3] = '\0';
+        case 2:
+            strncpy(city->region_code, word, REGION_CODE_BYTES);
+            city->region_code[REGION_CODE_BYTES] = '\0';
             break;
-        case 3: /* Region name */
-            strncpy(city->region_name, word, 63);
-            city->region_name[63] = '\0';
+        case 3:
+            strncpy(city->region_name, word, REGION_NAME_BYTES);
+            city->region_name[REGION_NAME_BYTES] = '\0';
             break;
-        case 4: /* Department code */
-            strncpy(city->dept_code, word, 3);
-            city->dept_code[3] = '\0';
+        case 4:
+            strncpy(city->dept_code, word, DEPT_CODE_BYTES);
+            city->dept_code[DEPT_CODE_BYTES] = '\0';
             break;
-        case 5: /* Department name */
-            strncpy(city->dept_name, word, 63);
-            city->dept_name[63] = '\0';
+        case 5:
+            strncpy(city->dept_name, word, DEPT_NAME_BYTES);
+            city->dept_name[DEPT_NAME_BYTES] = '\0';
             break;
-        case 6: /* Postal code */
-            strncpy(city->postal_code, word, 5);
-            city->postal_code[5] = '\0';
+        case 6:
+            strncpy(city->postal_code, word, POSTAL_CODE_BYTES);
+            city->postal_code[POSTAL_CODE_BYTES] = '\0';
             break;
-        case 7: /* Population */
+        case 7:
             city->population = atoi(word);
             break;
-        case 8: /* Latitude */
+        case 8:
             city->latitude = atof(word);
             break;
-        case 9: /* Longitude */
+        case 9:
             city->longitude = atof(word);
             break;
         }
+
         word = strtok(NULL, ",");
         field_index++;
     }
 
+    /* On exige exactement le nombre de champs attendu. */
+    if (field_index != CSV_FIELD_COUNT) {
+        fprintf(stderr,
+                "Error: Invalid CSV format, expected %d fields and got %d\n",
+                CSV_FIELD_COUNT,
+                field_index);
+        free(line_copy);
+        return -1;
+    }
+
     free(line_copy);
-    return 0; 
+    return 0;
 }
 
 /**
  * @brief Loads all cities from a CSV file into memory
  * @param path Path to the CSV file
- * @return Pointer to array of City structures, NULL on failure
- * @note The last City in the array has insee_code[0] = '\0' as terminator
- * @note Must be freed by the caller using free()
+ * @param cities Output pointer receiving allocated City array
+ * @return Number of parsed cities on success, -1 on failure
  */
-City *get_cities_from_csv(char *path)
-{
-    if (path == NULL)
-    {
-        fprintf(stderr, "Error: path is NULL\n");
-        return NULL;
+int get_cities_from_csv(const char *path, City **cities) {
+    int line_count;
+    int max_line_length;
+    char *buffer;
+    FILE *file;
+    int city_index;
+    City *shrunk_cities;
+
+    /* Validation d'entree et initialisation de la sortie. */
+    if (path == NULL || cities == NULL) {
+        fprintf(stderr, "Error: path or cities is NULL\n");
+        return -1;
     }
 
-    /* Get file statistics in one pass */
-    int line_count = 0, max_line_length = 0;
-    if (getFileStats(path, &line_count, &max_line_length) != 0)
-    {
+    *cities = NULL;
+
+    /* Premiere passe: determine la capacite necessaire. */
+    line_count = 0;
+    max_line_length = 0;
+    if (get_file_stats(path, &line_count, &max_line_length) != 0) {
         fprintf(stderr, "Error: Cannot get file stats\n");
-        return NULL;
+        return -1;
     }
 
-    if (line_count <= 0 || max_line_length <= 0)
-    {
+    if (line_count <= 0 || max_line_length <= 0) {
         fprintf(stderr, "Error: Invalid file (empty or invalid)\n");
-        return NULL;
+        return -1;
     }
 
-    /* Allocate array for cities (+1 for null terminator) */
-    City *cities = (City *)malloc((line_count + 1) * sizeof(City));
-    if (cities == NULL)
-    {
+    /* Allocation du tableau de villes. */
+    *cities = city_resize_array(NULL, line_count);
+    if (*cities == NULL) {
         fprintf(stderr, "Error: Memory allocation failed for cities array\n");
-        return NULL;
+        return -1;
     }
 
-    /* Allocate buffer for reading lines */
-    char *buffer = (char *)malloc((max_line_length + 1) * sizeof(char));
-    if (buffer == NULL)
-    {
+    /* Buffer dynamique adapte a la ligne la plus longue. */
+    buffer = (char *)malloc((max_line_length + 1) * sizeof(char));
+    if (buffer == NULL) {
         fprintf(stderr, "Error: Memory allocation failed for buffer\n");
-        free(cities);
-        return NULL;
+        free(*cities);
+        *cities = NULL;
+        return -1;
     }
 
-    /* Open file */
-    FILE *file = open_csv_file(path);
-    if (file == NULL)
-    {
-        fprintf(stderr, "Error: Cannot open file\n");
-        free(cities);
+    file = open_file(path);
+    if (file == NULL) {
+        free(*cities);
+        *cities = NULL;
         free(buffer);
-        return NULL;
+        return -1;
     }
 
-    /* Read and parse each line */
-    int city_index = 0;
-    while (fgets(buffer, max_line_length + 1, file) != NULL && city_index < line_count)
-    {
-        if (parse_csv_line(buffer, &cities[city_index]) == 0)
-        {
-            city_index++;
+    /* Deuxieme passe: lecture et parsing de chaque ligne. */
+    city_index = 0;
+    while (fgets(buffer, max_line_length + 1, file) != NULL && city_index < line_count) {
+        if (parse_csv_line(buffer, &(*cities)[city_index]) != 0) {
+            fprintf(stderr, "Error: Failed to parse line %d\n", city_index + 1);
+            free(*cities);
+            *cities = NULL;
+            free(buffer);
+            close_file(file);
+            return -1;
         }
-        else
-        {
-            fprintf(stderr, "Warning: Failed to parse line %d\n", city_index + 1);
-        }
+        city_index++;
     }
 
-    /* Add null terminator at the end */
-    cities[city_index].insee_code[0] = '\0';
+    /* Reallocation pour ne garder que les villes effectivement parsees. */
+    shrunk_cities = city_resize_array(*cities, city_index);
+    if (shrunk_cities != NULL || city_index == 0) {
+        *cities = shrunk_cities;
+    }
 
-    /* Cleanup */
     free(buffer);
-    close_csv_file(file);
 
-    return cities;
-}
-
-/**
- * @brief Prints all cities to stdout
- * @param cities Pointer to array of City structures
- * @param count Number of cities to print (0 for all until null terminator)
- */
-void printCities(const City *cities, int count)
-{
-    if (cities == NULL)
-    {
-        fprintf(stderr, "Error: cities pointer is NULL\n");
-        return;
+    if (close_file(file) == EOF) {
+        free(*cities);
+        *cities = NULL;
+        return -1;
     }
 
-    int i = 0;
-    printf("┌─────────┬──────────────────────────┬──────────────────┬────────────┬────────────┐\n");
-    printf("│ INSEE   │ City Name                │ Region           │ Population │ Lat/Lng    │\n");
-    printf("├─────────┼──────────────────────────┼──────────────────┼────────────┼────────────┤\n");
-
-    while (cities[i].insee_code[0] != '\0' && (count == 0 || i < count))
-    {
-        printf("│ %-7s │ %-24s │ %-16s │ %10d │ %.1f/%.1f │\n",
-               cities[i].insee_code,
-               cities[i].name,
-               cities[i].region_name,
-               cities[i].population,
-               cities[i].latitude,
-               cities[i].longitude);
-        i++;
-    }
-
-    printf("└─────────┴──────────────────────────┴──────────────────┴────────────┴────────────┘\n");
-    printf("Total: %d cities displayed\n", i);
+    return city_index;
 }

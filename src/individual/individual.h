@@ -15,7 +15,8 @@
 typedef struct {
     int score;                  /**< Fitness score (quality of the solution) */
     Hospital* hospitals;        /**< Array of hospitals defining this solution */
-    long isolated_population;   /**< Total population without hospital access */
+    int hospitals_size;
+    int isolated_population;   /**< Total population without hospital access */
     int chru_count;             /**< Number of CHRU included */
 } Individual;
 

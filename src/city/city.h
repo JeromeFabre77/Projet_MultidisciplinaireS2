@@ -48,5 +48,6 @@ void compute_city_neighbors(City *cities, int city_count);
 void free_cities(City *cities, int city_count);
 City *city_resize_array(City *cities, int city_count);
 void print_cities(const City *cities, int city_count, int count_to_print);
+void print_neighbor(City city);
 
 #endif

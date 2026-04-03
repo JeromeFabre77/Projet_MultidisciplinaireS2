@@ -26,6 +26,11 @@ double city_distance_km(const City *city1, const City *city2)
 
     double a = sin(dlat / 2.0) * sin(dlat / 2.0) + cos(lat1) * cos(lat2) * sin(dlon / 2.0) * sin(dlon / 2.0);
 
+    if (a > 1.0)
+        a = 1.0;
+    if (a < 0.0)
+        a = 0.0;
+
     double c = 2.0 * atan2(sqrt(a), sqrt(1.0 - a));
 
     return EARTH_RADIUS_KM * c;
@@ -42,18 +47,19 @@ double city_distance_km(const City *city1, const City *city2)
  */
 void compute_city_neighbors(City *cities, int city_count)
 {
-    if (cities == NULL || city_count == 0)
+    if (cities == NULL || city_count <= 0)
         return;
-    int i;
+
+    int i, j;
+
     for (i = 0; i < city_count; i++)
     {
-        cities[i].neighbors = NULL;
         cities[i].neighbor_size = 0;
+        cities[i].neighbors = NULL;
     }
 
     for (i = 0; i < city_count; i++)
     {
-        int j;
         for (j = i + 1; j < city_count; j++)
         {
             double distance = city_distance_km(&cities[i], &cities[j]);
@@ -70,36 +76,24 @@ void compute_city_neighbors(City *cities, int city_count)
     {
         if (cities[i].neighbor_size > 0)
         {
-            cities[i].neighbors = malloc((int)cities[i].neighbor_size * sizeof(Neighbor));
+            cities[i].neighbors = malloc(cities[i].neighbor_size * sizeof(Neighbor));
             if (cities[i].neighbors == NULL)
             {
-                int k;
-                for (k = 0; k < i; k++)
-                {
-                    free(cities[k].neighbors);
-                    cities[k].neighbors = NULL;
-                    cities[k].neighbor_size = 0;
-                }
+                fprintf(stderr, "Error: Memory allocation failed for neighbors array\n");
                 return;
             }
         }
     }
 
-    int *fill_count = (int *)calloc(city_count, sizeof(int));
+    int *fill_count = calloc(city_count, sizeof(int));
     if (fill_count == NULL)
     {
-        for (i = 0; i < city_count; i++)
-        {
-            free(cities[i].neighbors);
-            cities[i].neighbors = NULL;
-            cities[i].neighbor_size = 0;
-        }
+        fprintf(stderr, "Error: Memory allocation failed for fill_count\n");
         return;
     }
 
     for (i = 0; i < city_count; i++)
     {
-        int j;
         for (j = i + 1; j < city_count; j++)
         {
             double distance = city_distance_km(&cities[i], &cities[j]);
@@ -147,8 +141,6 @@ void free_cities(City *cities, int city_count)
 
     free(cities);
 }
-#include <stdlib.h>
-#include "city.h"
 
 /**
  * @brief Alloue ou reajuste dynamiquement un tableau de City.
@@ -217,4 +209,10 @@ void print_cities(const City *cities, int city_count, int count_to_print)
 
     printf("└─────────┴──────────────────────────┴──────────────────┴────────────┴────────────┘\n");
     printf("Total: %d cities displayed\n", limit);
+}
+
+void print_neighbor(City city)
+{
+    printf("%s\n", city.name);
+    print_cities(city.neighbors->city, city.neighbor_size, city.neighbor_size);
 }

@@ -1,4 +1,5 @@
 *.o
 projet_multidisciplinaireS2
+*.vscode
 /assets/results
 node_modules/

@@ -3,10 +3,8 @@
 
 #define HOSPITAL_COST 5000
 #define CHRU_BONUS 4000
-#define BORNE_MIN 10
-#define BORNE_MAX 20
 
-#include "../genetic/genetic.h"
+#include "../hospital/hospital.h"
 
 /**
  * @struct Individual
@@ -28,5 +26,7 @@ typedef struct {
     Individual* individuals; /**< Array of individuals forming the population */
     int number;              /**< Generation number */
 } Generation;
+
+
 
 #endif

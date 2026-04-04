@@ -7,6 +7,7 @@ BIN = projet_multidisciplinaireS2
 OBJ = main.o \
       utils/utils.o \
       city/city.o \
+			hospital/hospital.o \
       individual/individual.o \
       genetic/genetic.o \
       interface/interface.o \
@@ -16,7 +17,7 @@ OBJ = main.o \
 $(BIN): $(OBJ)
 	$(CC) -o $(BIN) $(OBJ) $(LDFLAGS)
 
-main.o: main.c genetic/genetic.h interface/interface.h parser/parser.h file_writer/file_writer.h city/city.h
+main.o: main.c genetic/genetic.h interface/interface.h parser/parser.h file_writer/file_writer.h city/city.h hospital/hospital.h
 	$(CC) -c main.c $(CFLAGS)
 
 utils/utils.o: utils/utils.c utils/utils.h genetic/genetic.h individual/individual.h city/city.h
@@ -24,6 +25,9 @@ utils/utils.o: utils/utils.c utils/utils.h genetic/genetic.h individual/individu
 
 city/city.o: city/city.c city/city.h utils/utils.h
 	$(CC) -c city/city.c -o city/city.o $(CFLAGS)
+
+	hospital/hospital.o: city/city.c city/city.h utils/utils.h
+	$(CC) -c hospital/hospital.c -o city/city.o $(CFLAGS)
 
 individual/individual.o: individual/individual.c individual/individual.h city/city.h utils/utils.h
 	$(CC) -c individual/individual.c -o individual/individual.o $(CFLAGS)

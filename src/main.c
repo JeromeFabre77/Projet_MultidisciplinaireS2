@@ -1,30 +1,48 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <math.h>
 #include "interface/interface.h"
 #include "parser/parser.h"
 #include "city/city.h"
+#include "hospital/hospital.h"
+#include "utils/utils.h"
 
 int main(void)
 {
     City *cities = NULL;
-    int city_count;
+    int cities_size = 0;
 
-    city_count = get_cities_from_csv("../assets/data/communes-france-metrople-2025.csv", &cities);
-
-    if (city_count < 0 || cities == NULL)
+    printf("Parsing CSV file for cities ...\n");
+    cities_size = get_cities_from_csv("../assets/data/communes-france-metrople-2025.csv", &cities);
+    if (cities_size < 0 || cities == NULL)
     {
         fprintf(stderr, "Error: Failed to load cities from CSV\n");
         return 1;
     }
 
-    printf("=== First 10 Cities ===\n");
-    print_cities(cities, city_count, 10);
+    print_cities(cities, cities_size, 10);
 
-    compute_city_neighbors(cities, city_count);
+    printf("Computing neighbors for each city ...\n");
+    compute_city_neighbors(cities, cities_size);
 
-    print_neighbor(cities[1]);
+    print_neighbor(cities[0]);
 
-    free_cities(cities, 6);
+    Hospital* hospitals = NULL;
+    int hospitals_size = 0;
+    int err_code = create_random_list_of_hospital(&hospitals, &hospitals_size, cities, cities_size);
+    if(err_code != 0) {
+        fprintf(stderr, "Error: Failed to create a random list of hospital\n");
+        return 1;
+    }
+
+    print_hospitals(hospitals, hospitals_size);
+
+    if (hospitals != NULL) {
+        free(hospitals);
+    }
+
+    free_cities(cities, cities_size);
+    
 
     return 0;
 }

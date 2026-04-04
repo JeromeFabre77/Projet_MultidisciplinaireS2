@@ -26,7 +26,6 @@ typedef struct {
     double longitude;        /**< Geographic coordinates: Longitude */
 } City;
 
-City *city_resize_array(City *cities, int city_count);
 void print_cities(const City *cities, int city_count, int count_to_print);
 
 #endif

@@ -1,14 +1,18 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+#include <time.h>
 #include "interface/interface.h"
 #include "parser/parser.h"
 #include "city/city.h"
 #include "hospital/hospital.h"
+#include "individual/individual.h"
 #include "utils/utils.h"
 
 int main(void)
 {
+    srand(time(NULL));
+
     City *cities = NULL;
     int cities_size = 0;
 
@@ -27,20 +31,26 @@ int main(void)
 
     print_neighbor(cities[0]);
 
-    Hospital* hospitals = NULL;
-    int hospitals_size = 0;
-    int err_code = create_random_list_of_hospital(&hospitals, &hospitals_size, cities, cities_size);
-    if(err_code != 0) {
-        fprintf(stderr, "Error: Failed to create a random list of hospital\n");
+    printf("\nGenerating a random individual...\n");
+    Individual* my_first_solution = create_random_individual(cities, cities_size);
+
+    if (my_first_solution == NULL) {
+        fprintf(stderr, "Error: Failed to create individual.\n");
+        free_cities(cities, cities_size);
         return 1;
     }
+    print_individual(my_first_solution, cities_size);
 
-    print_hospitals(hospitals, hospitals_size);
+    printf("Evaluating individual...\n");
+    evaluate_individual(my_first_solution, cities, cities_size);
+    print_individual(my_first_solution, cities_size);
 
-    if (hospitals != NULL) {
-        free(hospitals);
-    }
 
+
+
+
+    /* Clean everything */
+    printf("Cleaning up memory...\n");
     free_cities(cities, cities_size);
     
 

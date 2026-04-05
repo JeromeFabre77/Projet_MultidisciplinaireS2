@@ -1,8 +1,8 @@
 #ifndef __INDIVIDUAL__
 #define __INDIVIDUAL__
 
-#define HOSPITAL_COST 5000
-#define CHRU_BONUS 4000
+#define PENALTY_HOSPITAL 5000
+#define BONUS_CHRU 4000
 
 #include "../hospital/hospital.h"
 
@@ -15,6 +15,7 @@ typedef struct {
     Hospital* hospitals;        /**< Array of hospitals defining this solution */
     int hospitals_size;
     int isolated_population;   /**< Total population without hospital access */
+    int total_population;
     int chru_count;             /**< Number of CHRU included */
 } Individual;
 
@@ -28,5 +29,8 @@ typedef struct {
 } Generation;
 
 
+Individual* create_random_individual(City* cities, int cities_size);
+void evaluate_individual(Individual* ind, City* cities, int cities_size);
+void print_individual(const Individual* ind, int cities_size);
 
 #endif

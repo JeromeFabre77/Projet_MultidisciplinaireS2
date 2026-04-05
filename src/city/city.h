@@ -42,13 +42,14 @@ struct City
     double latitude;                         /**< Geographic coordinates: Latitude */
     double longitude;                        /**< Geographic coordinates: Longitude */
     Neighbor *neighbors;                     /**< The list of neighbors */
-    int neighbor_size;                       /**<Number of neighbors */
+    int neighbors_size;                       /**<Number of neighbors */
 };
 
 void compute_city_neighbors(City *cities, int city_count);
 void free_cities(City *cities, int city_count);
 City *city_resize_array(City *cities, int city_count);
 void print_cities(City *cities, int city_count, int count_to_print);
+void print_hospital_cities(City** cities_ptr, int city_count, int count_to_print);
 void print_neighbor(City city);
 
 #endif

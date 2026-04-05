@@ -32,7 +32,7 @@ void compute_city_neighbors(City *cities, int cities_size)
     int i;
     for (i = 0; i < cities_size; i++)
     {
-        cities[i].neighbor_size = 0;
+        cities[i].neighbors_size = 0;
         cities[i].neighbors = NULL;
     }
 
@@ -57,8 +57,8 @@ void compute_city_neighbors(City *cities, int cities_size)
 
             if (distance <= COVERAGE_RADIUS_KM)
             {
-                cities[i].neighbor_size++;
-                cities[j].neighbor_size++;
+                cities[i].neighbors_size++;
+                cities[j].neighbors_size++;
             }
         }
     }
@@ -66,9 +66,9 @@ void compute_city_neighbors(City *cities, int cities_size)
     /* Allocate the neighbors array for each city */
     for (i = 0; i < cities_size; i++)
     {
-        if (cities[i].neighbor_size > 0)
+        if (cities[i].neighbors_size > 0)
         {
-            cities[i].neighbors = malloc(cities[i].neighbor_size * sizeof(Neighbor));
+            cities[i].neighbors = malloc(cities[i].neighbors_size * sizeof(Neighbor));
             if (cities[i].neighbors == NULL)
             {
                 fprintf(stderr, "Error: Memory allocation failed for neighbors array\n");
@@ -140,7 +140,7 @@ void free_cities(City *cities, int city_count)
     {
         free(cities[i].neighbors);
         cities[i].neighbors = NULL;
-        cities[i].neighbor_size = 0;
+        cities[i].neighbors_size = 0;
     }
 
     free(cities);
@@ -213,19 +213,41 @@ void print_cities(City *cities, int city_count, int count_to_print)
     printf("End: %d cities displayed on %d\n", count_to_print, city_count);
 }
 
+
+void print_hospital_cities(City** cities_ptr, int city_count, int count_to_print) {
+    int i;
+    int limit;
+    
+    if (cities_ptr == NULL) return;
+
+    /* On s'assure de ne pas dépasser ce qui est disponible */
+    limit = (count_to_print > city_count) ? city_count : count_to_print;
+
+    for (i = 0; i < limit; i++) {
+        /* ICI : On accède via le pointeur -> */
+        printf("  - %s (%d hab.)\n", 
+               cities_ptr[i]->name, 
+               cities_ptr[i]->population);
+    }
+    
+    if (city_count > limit) {
+        printf("  ... and %d more cities.\n", city_count - limit);
+    }
+}
+
 /* Temporary function kept for debugging/preview until UI rendering fully replaces terminal output. */
 void print_neighbor(City city)
 {
-    printf("\nNeighbors for city %s (%d neighbors found):\n", city.name, city.neighbor_size);
+    printf("\nNeighbors for city %s (%d neighbors found):\n", city.name, city.neighbors_size);
 
-    if (city.neighbors == NULL || city.neighbor_size == 0)
+    if (city.neighbors == NULL || city.neighbors_size == 0)
     {
         printf("  (No neighbors found within %d km)\n", COVERAGE_RADIUS_KM);
         return;
     }
 
     int i;
-    for (i = 0; i < city.neighbor_size; i++)
+    for (i = 0; i < city.neighbors_size; i++)
     {
         City *nb = city.neighbors[i].city;
         double dist = city.neighbors[i].distance;

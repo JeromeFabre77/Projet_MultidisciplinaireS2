@@ -3,9 +3,13 @@
 
 #include "hospital.h"
 
+#include "../city/city.h"
+
 
 #define CHANCES_MIN_TO_PLACE_HOSPITAL 10 /* Percentage minimal of chances to associate an hospital to a city when creating randomly, on 100 */
 #define CHANCES_MAX_TO_PLACE_HOSPITAL 20 /* Percentage maximal of chances to associate an hospital to a city when creating randomly, on 100 */
+
+
 
 int create_random_list_of_hospital(Hospital** hospitals, int* hospitals_size, City* cities, int cities_size) {
   if (cities == NULL)
@@ -46,7 +50,7 @@ int create_random_list_of_hospital(Hospital** hospitals, int* hospitals_size, Ci
 
     /* Allocate memory for the hospitals array */
     *hospitals = malloc(hospital_count * sizeof(Hospital));
-    if (hospitals == NULL) {
+    if (*hospitals == NULL) {
         free(selected_indices);
         fprintf(stderr, "Error: hospitals is null, memory allocation failed\n");
         return -1;
@@ -61,8 +65,6 @@ int create_random_list_of_hospital(Hospital** hospitals, int* hospitals_size, Ci
         h->is_chru = (h->location->population > 80000) ? 1 : 0;
         h->covered_population = 0;
         h->bed_count = 0;
-        h->cities = NULL;
-        h->cities_size = 0;
     }
 
     free(selected_indices);
@@ -72,6 +74,8 @@ int create_random_list_of_hospital(Hospital** hospitals, int* hospitals_size, Ci
     printf("Successfully created %d hospitals.\n", hospital_count);
     return 0;
 }
+
+
 
 void free_hospital_resources(Hospital *h) {
     if (h == NULL) return;
@@ -83,25 +87,34 @@ void free_hospital_resources(Hospital *h) {
 }
 
 
-void print_hospitals(Hospital* hospitals, int hospitals_size) {
-    if (hospitals == NULL || hospitals_size <= 0) {
-        fprintf(stderr, "Error: hospitals or hospitals_size is 0\n");
+/* temp */
+void print_hospital(const Hospital* h) {
+    if (h == NULL || h->location == NULL) {
+        printf("[Hospital] Error: Invalid data.\n");
         return;
     }
 
-    int i;
-    for (i = 0; i < hospitals_size; i++) {
-        City *loc = hospitals[i].location;
+    printf("Situated at %s, cover %d people, have %d beds, is it a CHRU : %s . ", 
+           h->location->name, 
+           h->covered_population,
+           h->bed_count,
+           h->is_chru ? "yes" : "no");
 
-        if (loc != NULL) {
-            printf("Hospital [%d]: %s (Dept: %s, Pop: %d)%s\n", 
-                i + 1, 
-                loc->name, 
-                loc->dept_code, 
-                loc->population,
-                hospitals[i].is_chru ? " [CHRU]" : "");
-        } else {
-            printf("Hospital [%d]: Error - No location assigned!\n", i + 1);
-        }
+    printf("List of impacted cities (5 first ...) : \n");
+    print_hospital_cities(h->cities, h->cities_size, 5);
+}
+
+/* temp */
+void print_hospitals(const Hospital* hospitals, int size, int limit) {
+    if (hospitals == NULL || size <= 0) {
+        printf("No hospitals to display.\n");
+        return;
+    }
+
+    int actual_limit = (limit < size) ? limit : size;
+    int i;
+    for (i = 0; i < actual_limit; i++) {
+        print_hospital(&hospitals[i]);
     }
 }
+

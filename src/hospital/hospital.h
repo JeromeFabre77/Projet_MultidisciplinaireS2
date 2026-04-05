@@ -14,11 +14,11 @@ typedef struct
     int covered_population; /**< Total population of all cities attached to this hospital */
     int bed_count;          /**< Number of available beds in the facility */
     City *location;         /**< The specific city where the hospital is built */
-    City *cities;           /**< Array of cities served by this hospital */
+    City **cities;           /**< Array of cities served by this hospital */
     int cities_size;
 } Hospital;
 
 int create_random_list_of_hospital(Hospital** hospitals, int* hospitals_size, City* cities, int cities_size);
-void print_hospitals(Hospital* hospitals, int hospitals_size);
+void print_hospitals(const Hospital* hospitals, int size, int limit);
 
 #endif

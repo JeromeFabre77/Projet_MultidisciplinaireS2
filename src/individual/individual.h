@@ -30,7 +30,7 @@ typedef struct {
 
 
 void create_random_individual(Individual* individual, City* cities, int cities_size);
-compare_individuals(const void* a, const void* b);
+int compare_individuals(const void* a, const void* b);
 void print_individual(const Individual* ind);
 
 #endif

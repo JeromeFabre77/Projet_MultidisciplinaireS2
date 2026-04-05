@@ -5,40 +5,6 @@
 
 #define BED_FOR_POPULATION 5.4 /* Number of bed needed for 1000 people covered by an hospital*/
 
-Individual *create_random_individual(City *cities, int cities_size)
-{
-  Individual *individual = malloc(sizeof(Individual));
-  if (!individual)
-  {
-    fprintf(stderr, "Error: individual is null, memory allocation failed\n");
-    return NULL;
-  }
-
-  int err_code = create_random_list_of_hospital(&(individual->hospitals), &individual->hospitals_size, cities, cities_size);
-  if (err_code != 0)
-  {
-    free(individual);
-    fprintf(stderr, "Error: Failed to create a random list of hospital\n");
-    return NULL;
-  }
-
-  individual->chru_count = 0;
-  int i;
-  for(i=0; i<individual->hospitals_size; i++) {
-    if(individual->hospitals[i].is_chru) {
-      individual->chru_count++;
-    }
-  }
-
-
-  individual->score = 0;
-  individual->isolated_population = 0;
-  
-
-  return individual;
-}
-
-
 
 
 void evaluate_individual(Individual* individual, City* cities, int cities_size) {
@@ -161,13 +127,67 @@ void evaluate_individual(Individual* individual, City* cities, int cities_size) 
 
 
 
+void create_random_individual(Individual* individual, City *cities, int cities_size)
+{
+  if (!individual)
+  {
+    fprintf(stderr, "Error: individual is null, memory allocation failed\n");
+    return;
+  }
+
+  int err_code = create_random_list_of_hospital(&(individual->hospitals), &individual->hospitals_size, cities, cities_size);
+  if (err_code != 0)
+  {
+    fprintf(stderr, "Error: Failed to create a random list of hospital\n");
+    return;
+  }
+
+  individual->chru_count = 0;
+  int i;
+  for(i=0; i<individual->hospitals_size; i++) {
+    if(individual->hospitals[i].is_chru) {
+      individual->chru_count++;
+    }
+  }
+
+
+  individual->score = 0;
+  individual->isolated_population = 0;
+
+  evaluate_individual(individual, cities, cities_size);
+  
+}
+
+
+/**
+ * @brief Compare deux individus par leur score pour le tri.
+ * Ordre décroissant : le score le plus élevé arrive en premier (index 0).
+ */
+int compare_individuals(const void* a, const void* b) {
+    /* Cast des pointeurs génériques en pointeurs d'Individual */
+    const Individual* indA = (const Individual*)a;
+    const Individual* indB = (const Individual*)b;
+
+    if (indB->score > indA->score) {
+        return 1;
+    } else if (indB->score < indA->score) {
+        return -1;
+    } else {
+        return 0;
+    }
+}
+
+
+
+
+
 
 
 
 
 
 /* Temporary */
-void print_individual(const Individual *individual, int cities_size)
+void print_individual(const Individual *individual)
 {
   if (individual == NULL)
   {

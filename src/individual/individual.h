@@ -29,8 +29,8 @@ typedef struct {
 } Generation;
 
 
-Individual* create_random_individual(City* cities, int cities_size);
-void evaluate_individual(Individual* ind, City* cities, int cities_size);
-void print_individual(const Individual* ind, int cities_size);
+void create_random_individual(Individual* individual, City* cities, int cities_size);
+compare_individuals(const void* a, const void* b);
+void print_individual(const Individual* ind);
 
 #endif

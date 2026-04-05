@@ -51,3 +51,5 @@ double city_distance_km(City *city1, City *city2)
 
     return EARTH_RADIUS_KM * c;
 }
+
+

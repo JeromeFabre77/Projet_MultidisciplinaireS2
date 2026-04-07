@@ -7,21 +7,23 @@
 #include "../utils/utils.h"
 
 /**
- * @brief Add neighbors in cities.
- * @param cities list of cities.
- * @param cities_size number of cities.
- * @return void.
+ * @brief Compute all the neighbors of all cities and store it in the neighbors array in each city.
+ * 
+ * It is based on the COVERAGE_RADIUS_KM.
+ * 
+ * @param cities The array of all cities
+ * @param cities_size The size of the array of all cities
  */
 void compute_city_neighbors(City *cities, int cities_size)
 {
     if (cities == NULL)
     {
-        fprintf(stderr, "Error: cities is null\n");
+        fprintf(stderr, "Error from compute_city_neighbors : cities is null\n");
         return;
     }
     if (cities_size <= 0)
     {
-        fprintf(stderr, "Error: cities_size is 0 or minus\n");
+        fprintf(stderr, "Error from compute_city_neighbors : cities_size is 0 or minus\n");
         return;
     }
 
@@ -68,7 +70,7 @@ void compute_city_neighbors(City *cities, int cities_size)
             cities[i].neighbors = malloc(cities[i].neighbors_size * sizeof(Neighbor));
             if (cities[i].neighbors == NULL)
             {
-                fprintf(stderr, "Error: Memory allocation failed for neighbors array\n");
+                fprintf(stderr, "Error compute_city_neighbors : Memory allocation failed\n");
                 return;
             }
         }
@@ -78,7 +80,7 @@ void compute_city_neighbors(City *cities, int cities_size)
     int *fill_count = calloc(cities_size, sizeof(int));
     if (fill_count == NULL)
     {
-        fprintf(stderr, "Error: Memory allocation failed for fill_count\n");
+        fprintf(stderr, "Error from compute_city_neighbors : Memory allocation failed\n");
         return;
     }
 
@@ -121,19 +123,18 @@ void compute_city_neighbors(City *cities, int cities_size)
 /**
  * @brief free a list of cities.
  *
- * @param cities list of cities.
- *
- * @param city_count number of cities.
+ * @param cities The array of all cities
+ * @param cities_size The size of the array of all cities
  *
  * @return void.
  */
-void free_cities(City *cities, int city_count)
+void free_cities(City *cities, int city_size)
 {
     if (cities == NULL)
         return;
 
     int i;
-    for (i = 0; i < city_count; i++)
+    for (i = 0; i < city_size; i++)
     {
         free(cities[i].neighbors);
         cities[i].neighbors = NULL;
@@ -149,17 +150,17 @@ void free_cities(City *cities, int city_count)
  * @param city_count Nombre d'elements City souhaites.
  * @return Nouveau pointeur valide, ou NULL en cas d'echec (ou si city_count <= 0).
  */
-City *city_resize_array(City *cities, int city_count)
+City *city_resize_array(City *cities, int city_size)
 {
     City *resized;
 
-    if (city_count <= 0)
+    if (city_size <= 0)
     {
         free(cities);
         return NULL;
     }
 
-    resized = (City *)realloc(cities, city_count * sizeof(City));
+    resized = (City *)realloc(cities, city_size * sizeof(City));
     if (resized == NULL)
     {
         fprintf(stderr, "Error: Memory reallocation failed for cities array\n");

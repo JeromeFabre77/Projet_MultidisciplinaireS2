@@ -29,4 +29,6 @@ void create_random_individual(Individual* individual, City* cities, int cities_s
 
 void copy_individual(Individual* dest, const Individual* src, City *cities, int cities_size);
 
+void cross_two_individuals(Individual *child, const Individual *first_parent, const Individual *second_parent, City *cities, int cities_size);
+
 #endif

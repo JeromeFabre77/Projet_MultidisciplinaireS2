@@ -45,8 +45,10 @@ struct City
     int neighbors_size;                       /**<Number of neighbors */
 };
 
-void compute_city_neighbors(City *cities, int city_count);
-void free_cities(City *cities, int city_count);
-City *city_resize_array(City *cities, int city_count);
+void compute_city_neighbors(City *cities, int city_size);
+
+void free_cities(City *cities, int city_size);
+
+City *city_resize_array(City *cities, int city_size);
 
 #endif

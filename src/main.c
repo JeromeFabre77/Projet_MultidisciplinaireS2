@@ -5,7 +5,6 @@
 #include "interface/interface.h"
 #include "parser/parser.h"
 #include "city/city.h"
-#include "hospital/hospital.h"
 #include "individual/individual.h"
 #include "generation/generation.h"
 #include "utils/utils.h"
@@ -41,13 +40,13 @@ int main(void)
     /* Check if settings are correct */
     if (ELITE_RATE + CROSSOVER_RATE + MUTATION_RATE + RANDOM_RATE != 1)
     {
-        fprintf(stderr, "Error: The sum of defined RATES is not 1\n");
+        fprintf(stderr, "Error from main : The sum of defined RATES is not 1\n");
         return 1;
     }
 
     if (NB_ELITE + NB_CROSSOVER + NB_MUTAT + NB_RND != INDIVIDUALS_SIZE)
     {
-        fprintf(stderr, "Error: The sum of defined NB is not equals to INDIVIDUALS_SIZE\n");
+        fprintf(stderr, "Error from main : The sum of defined NB is not equals to INDIVIDUALS_SIZE\n");
         return 1;
     }
 
@@ -60,7 +59,7 @@ int main(void)
     cities_size = get_cities_from_csv("../assets/data/communes-france-metrople-2025.csv", &cities);
     if (cities_size < 0 || cities == NULL)
     {
-        fprintf(stderr, "Error: Failed to load cities from CSV\n");
+        fprintf(stderr, "Error from main : Failed to load cities from CSV\n");
         return 1;
     }
 
@@ -76,7 +75,7 @@ int main(void)
     current_gen.individuals = malloc(INDIVIDUALS_SIZE * sizeof(Individual));
     if (current_gen.individuals == NULL)
     {
-        fprintf(stderr, "Error: Failed to allocate population memory.\n");
+        fprintf(stderr, "Error from main : Failed to allocate population memory.\n");
         return 1;
     }
 
@@ -99,7 +98,7 @@ int main(void)
         next_gen.individuals = malloc(INDIVIDUALS_SIZE * sizeof(Individual));
         if (next_gen.individuals == NULL)
         {
-            fprintf(stderr, "Fatal: Memory allocation failed for generation %d\n", next_gen.number);
+            fprintf(stderr, "Error from main: Memory allocation failed for generation %d\n", next_gen.number);
             break;
         }
 
@@ -109,6 +108,19 @@ int main(void)
         for (i = 0; i < NB_ELITE; i++)
         {
             copy_individual(&next_gen.individuals[current_idx], &current_gen.individuals[i], cities, cities_size);
+            current_idx++;
+        }
+
+        /* Generate child from two parents of the previous generation draw randomly in the NB_SELECTED bests */
+        for (i = 0; i < NB_CROSSOVER; i++)
+        {
+            int parent1_idx = rand() % NB_SELECTED;
+            int parent2_idx = rand() % NB_SELECTED;
+
+            cross_two_individuals(&next_gen.individuals[current_idx], 
+                                  &current_gen.individuals[parent1_idx], 
+                                  &current_gen.individuals[parent2_idx], 
+                                  cities, cities_size);
             current_idx++;
         }
 

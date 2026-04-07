@@ -10,6 +10,15 @@
 #define CHANCES_MAX_TO_PLACE_HOSPITAL 20 /* Percentage maximal of chances to associate an hospital to a city when creating randomly, on 100 */
 
 
+void init_hospital(Hospital* hospital) {
+    hospital->location = NULL;
+    hospital->is_chru = 0;
+    hospital->bed_count = 0;
+    hospital->cities = NULL;
+    hospital->cities_size = 0;
+    hospital->covered_population = 0;
+}
+
 
 int create_random_list_of_hospital(Hospital** hospitals, int* hospitals_size, City* cities, int cities_size) {
   if (cities == NULL)
@@ -62,7 +71,7 @@ int create_random_list_of_hospital(Hospital** hospitals, int* hospitals_size, Ci
         Hospital *h = &((*hospitals)[i]);
 
         h->location = &cities[city_idx];
-        h->is_chru = (h->location->population > 80000) ? 1 : 0;
+        h->is_chru = 0;
         h->covered_population = 0;
         h->bed_count = 0;
     }
@@ -71,10 +80,8 @@ int create_random_list_of_hospital(Hospital** hospitals, int* hospitals_size, Ci
 
     *hospitals_size = hospital_count; 
 
-    printf("Successfully created %d hospitals.\n", hospital_count);
     return 0;
 }
-
 
 
 void free_hospital_resources(Hospital *h) {
@@ -85,36 +92,3 @@ void free_hospital_resources(Hospital *h) {
         h->cities = NULL;
     }
 }
-
-
-/* temp */
-void print_hospital(const Hospital* h) {
-    if (h == NULL || h->location == NULL) {
-        printf("[Hospital] Error: Invalid data.\n");
-        return;
-    }
-
-    printf("Situated at %s, cover %d people, have %d beds, is it a CHRU : %s . ", 
-           h->location->name, 
-           h->covered_population,
-           h->bed_count,
-           h->is_chru ? "yes" : "no");
-
-    printf("List of impacted cities (5 first ...) : \n");
-    print_hospital_cities(h->cities, h->cities_size, 5);
-}
-
-/* temp */
-void print_hospitals(const Hospital* hospitals, int size, int limit) {
-    if (hospitals == NULL || size <= 0) {
-        printf("No hospitals to display.\n");
-        return;
-    }
-
-    int actual_limit = (limit < size) ? limit : size;
-    int i;
-    for (i = 0; i < actual_limit; i++) {
-        print_hospital(&hospitals[i]);
-    }
-}
-

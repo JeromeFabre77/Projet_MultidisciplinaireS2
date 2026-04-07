@@ -5,6 +5,6 @@
 
 double deg_to_rad(double deg);
 
-double city_distance_km(City *city1, City *city2);
+double get_distance_between(City *city1, City *city2);
 
 #endif

@@ -18,7 +18,7 @@ typedef struct
     int cities_size;
 } Hospital;
 
+void init_hospital(Hospital* hospital);
 int create_random_list_of_hospital(Hospital** hospitals, int* hospitals_size, City* cities, int cities_size);
-void print_hospitals(const Hospital* hospitals, int size, int limit);
 
 #endif

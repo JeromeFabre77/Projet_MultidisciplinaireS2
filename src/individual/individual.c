@@ -3,10 +3,60 @@
 
 #include "individual.h"
 
+#include "../hospital/hospital.h"
+
+#define CHRU_MIN_POPULATION 80000
 #define BED_FOR_POPULATION 5.4 /* Number of bed needed for 1000 people covered by an hospital*/
 
 
+/**
+ * @brief Initialize an individual with null or 0 values. It MUST be use after a memory allocation for create an individual.
+ * @param individual The pointer to individual to initialize
+ */
+void init_individual(Individual* individual) {
+    individual->score = 0;
+    individual->hospitals = NULL;
+    individual->hospitals_size = 0;
+    individual->chru_count = 0;
+    individual->isolated_population = 0;
+    individual->total_population = 0;
+}
 
+
+/**
+ * @brief Compare to induviduals depending on their score. Usefull for using qsort
+ * @param a the first individual
+ * @param b the second individual
+ * @return 0 if they are equals, 1 if the b is higher that a, -1 if a is higher thant b
+ */
+int compare_individuals(const void* a, const void* b) {
+    const Individual* indA = (const Individual*)a;
+    const Individual* indB = (const Individual*)b;
+
+    if (indB->score > indA->score) {
+        return 1;
+    } else if (indB->score < indA->score) {
+        return -1;
+    } else {
+        return 0;
+    }
+}
+
+/**
+ * @brief Compute all stats of an individual including :
+ *  - the cities impacted by each hospital of the array hospitals of the individual
+ *  - the value is_chru of each hospital
+ *  - the covered population of each hospital
+ *  - the bed count of each hospital
+ *  - the number of chru of the individual
+ *  - the population isolated 
+ *  - the total population
+ *  - the score of the individual 
+ *  
+ * @param individual A pointer to the individual to evaluate
+ * @param cities The array of all cities
+ * @param cities The size of the array of all cities
+ */
 void evaluate_individual(Individual* individual, City* cities, int cities_size) {
     if (individual == NULL)  {
       fprintf(stderr, "Error from evaluate_individual: individual is null\n");
@@ -42,6 +92,10 @@ void evaluate_individual(Individual* individual, City* cities, int cities_size) 
     for (i = 0; i < individual->hospitals_size; i++) {
         int idx = (int)(individual->hospitals[i].location - cities);
         hospital_at_city[idx] = i;
+
+        if(individual->hospitals[i].location->population >= CHRU_MIN_POPULATION) {
+          individual->hospitals[i].is_chru = 1;
+        }
     
         if (individual->hospitals[i].is_chru) {
             individual->chru_count++;
@@ -126,7 +180,12 @@ void evaluate_individual(Individual* individual, City* cities, int cities_size) 
 
 
 
-
+/**
+ * @brief Fill an individual with a random list of hospital
+ * @param individual A pointer to the individual
+ * @param cities The array of all cities
+ * @param cities The size of the array of all cities
+ */
 void create_random_individual(Individual* individual, City *cities, int cities_size)
 {
   if (!individual)
@@ -135,74 +194,45 @@ void create_random_individual(Individual* individual, City *cities, int cities_s
     return;
   }
 
-  int err_code = create_random_list_of_hospital(&(individual->hospitals), &individual->hospitals_size, cities, cities_size);
-  if (err_code != 0)
-  {
-    fprintf(stderr, "Error: Failed to create a random list of hospital\n");
-    return;
-  }
+  init_individual(individual);
 
-  individual->chru_count = 0;
-  int i;
-  for(i=0; i<individual->hospitals_size; i++) {
-    if(individual->hospitals[i].is_chru) {
-      individual->chru_count++;
-    }
-  }
-
-
-  individual->score = 0;
-  individual->isolated_population = 0;
+  create_random_list_of_hospital(&(individual->hospitals), &individual->hospitals_size, cities, cities_size);
 
   evaluate_individual(individual, cities, cities_size);
-  
 }
+
 
 
 /**
- * @brief Compare deux individus par leur score pour le tri.
- * Ordre décroissant : le score le plus élevé arrive en premier (index 0).
+ * @brief Fill an individual with the list of hospital of another individual
+ * @param individual A pointer to the individual
+ * @param cities The array of all cities
+ * @param cities The size of the array of all cities
+ * @return 0 if they are equals, 1 if the b is higher that a, -1 if a is higher thant b
  */
-int compare_individuals(const void* a, const void* b) {
-    /* Cast des pointeurs génériques en pointeurs d'Individual */
-    const Individual* indA = (const Individual*)a;
-    const Individual* indB = (const Individual*)b;
+void copy_individual(Individual* dest, const Individual* src, City *cities, int cities_size) {
+    if (!dest || !src) return;
 
-    if (indB->score > indA->score) {
-        return 1;
-    } else if (indB->score < indA->score) {
-        return -1;
-    } else {
-        return 0;
+    init_individual(dest);
+
+    dest->hospitals_size = src->hospitals_size;
+    dest->hospitals = malloc(dest->hospitals_size * sizeof(Hospital));
+    
+    if (dest->hospitals == NULL) {
+        fprintf(stderr, "Error: Failed to allocate memory for individual copy\n");
+        return;
     }
-}
 
+    int i;
+    for (i = 0; i < dest->hospitals_size; i++) {
+        /* 1. On remet l'hôpital à neuf (pointeurs à NULL) */
+        init_hospital(&dest->hospitals[i]);
 
+        /* 2. On recopie uniquement l'ADN du parent */
+        dest->hospitals[i].location = src->hospitals[i].location;
+        dest->hospitals[i].is_chru = src->hospitals[i].is_chru;
+    }
 
-
-
-
-
-
-
-
-/* Temporary */
-void print_individual(const Individual *individual)
-{
-  if (individual == NULL)
-  {
-    printf("Individual is NULL.\n");
-    return;
-  }
-
-  printf("============= An individual =============\n");
-  printf("Score (Fitness)      : %d\n", individual->score);
-  printf("Hospitals Count      : %d\n", individual->hospitals_size);
-  printf("CHRU Count           : %d\n", individual->chru_count);
-  printf("Total Population  : %d\n", individual->total_population);
-  printf("Isolated Population  : %d\n", individual->isolated_population);
-  printf("Hospital List (5 firsts ...):\n");
-  print_hospitals(individual->hospitals, individual->hospitals_size, 5);
-
-  printf("\n\n");
+    /* 3. On génère le reste par l'évaluation */
+    evaluate_individual(dest, cities, cities_size);
 }

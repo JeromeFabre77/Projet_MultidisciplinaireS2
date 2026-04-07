@@ -2,8 +2,8 @@
 #define __CITY__
 
 
-#define COVERAGE_RADIUS_KM 10
-#define DELTA_LAT (COVERAGE_RADIUS_KM / 111.0)
+#define COVERAGE_RADIUS_KM 10 /* Radius in Km of the area of cities covered by an hospital */
+#define DELTA_LAT (COVERAGE_RADIUS_KM / 111.0) /* Latitude delta that correspond to the value of radius (111 Km ~= 1 latitude degree) */
 
 #define INSEE_CODE_BYTES 5
 #define CITY_NAME_BYTES 63
@@ -21,8 +21,8 @@ typedef struct City City;
  */
 typedef struct
 {
-    City *city;      /**< Pointer of a city */
-    double distance; /**< The distance separating the neighbor from the city*/
+    City *city;      /* Pointer to the neighbor city */
+    double distance; /* The distance separating the neighbor from the city */
 } Neighbor;
 
 /**
@@ -31,7 +31,7 @@ typedef struct
  */
 struct City
 {
-    char insee_code[INSEE_CODE_BYTES + 1];   /**< INSEE code (5 digits + '\0') */
+    char insee_code[INSEE_CODE_BYTES + 1];   /**< INSEE code */
     char name[CITY_NAME_BYTES + 1];          /**< City name */
     char region_code[REGION_CODE_BYTES + 1]; /**< Region code */
     char region_name[REGION_NAME_BYTES + 1]; /**< Region name */
@@ -48,8 +48,5 @@ struct City
 void compute_city_neighbors(City *cities, int city_count);
 void free_cities(City *cities, int city_count);
 City *city_resize_array(City *cities, int city_count);
-void print_cities(City *cities, int city_count, int count_to_print);
-void print_hospital_cities(City** cities_ptr, int city_count, int count_to_print);
-void print_neighbor(City city);
 
 #endif

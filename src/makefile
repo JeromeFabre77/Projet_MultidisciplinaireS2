@@ -1,5 +1,5 @@
 CC = gcc
-CFLAGS = -Wall -ansi
+CFLAGS = -Wall -ansi -g
 LDFLAGS = -lMLV -lm
 
 BIN = projet_multidisciplinaireS2
@@ -9,6 +9,7 @@ OBJ = main.o \
       city/city.o \
 			hospital/hospital.o \
       individual/individual.o \
+			generation/generation.o \
       genetic/genetic.o \
       interface/interface.o \
       parser/csv_parser.o \
@@ -17,7 +18,7 @@ OBJ = main.o \
 $(BIN): $(OBJ)
 	$(CC) -o $(BIN) $(OBJ) $(LDFLAGS)
 
-main.o: main.c genetic/genetic.h interface/interface.h parser/parser.h file_writer/file_writer.h city/city.h hospital/hospital.h
+main.o: main.c genetic/genetic.h interface/interface.h parser/parser.h file_writer/file_writer.h city/city.h hospital/hospital.h generation/generation.h
 	$(CC) -c main.c $(CFLAGS)
 
 utils/utils.o: utils/utils.c utils/utils.h genetic/genetic.h individual/individual.h city/city.h
@@ -26,11 +27,14 @@ utils/utils.o: utils/utils.c utils/utils.h genetic/genetic.h individual/individu
 city/city.o: city/city.c city/city.h utils/utils.h
 	$(CC) -c city/city.c -o city/city.o $(CFLAGS)
 
-	hospital/hospital.o: city/city.c city/city.h utils/utils.h
+hospital/hospital.o: city/city.c city/city.h utils/utils.h
 	$(CC) -c hospital/hospital.c -o city/city.o $(CFLAGS)
 
 individual/individual.o: individual/individual.c individual/individual.h city/city.h utils/utils.h
 	$(CC) -c individual/individual.c -o individual/individual.o $(CFLAGS)
+
+generation/generation.o: generation/generation.c generation/generation.h individual/individual.h city/city.h utils/utils.h
+	$(CC) -c generation/generation.c -o generation/generation.o $(CFLAGS)
 
 genetic/genetic.o: genetic/genetic.c genetic/genetic.h individual/individual.h city/city.h utils/utils.h
 	$(CC) -c genetic/genetic.c -o genetic/genetic.o $(CFLAGS)

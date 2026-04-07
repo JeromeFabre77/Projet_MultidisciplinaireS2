@@ -8,11 +8,8 @@
 
 /**
  * @brief Add neighbors in cities.
- *
  * @param cities list of cities.
- *
  * @param cities_size number of cities.
- *
  * @return void.
  */
 void compute_city_neighbors(City *cities, int cities_size)
@@ -53,7 +50,7 @@ void compute_city_neighbors(City *cities, int cities_size)
             if (fabs(cities[j].longitude - cities[i].longitude) > delta_lon)
                 continue;
 
-            double distance = city_distance_km(&cities[i], &cities[j]);
+            double distance = get_distance_between(&cities[i], &cities[j]);
 
             if (distance <= COVERAGE_RADIUS_KM)
             {
@@ -100,7 +97,7 @@ void compute_city_neighbors(City *cities, int cities_size)
             if (fabs(cities[j].longitude - cities[i].longitude) > delta_lon)
                 continue;
 
-            double distance = city_distance_km(&cities[i], &cities[j]);
+            double distance = get_distance_between(&cities[i], &cities[j]);
 
             if (distance <= COVERAGE_RADIUS_KM)
             {
@@ -170,89 +167,4 @@ City *city_resize_array(City *cities, int city_count)
     }
 
     return resized;
-}
-
-/* Temporary function kept for debugging/preview until UI rendering fully replaces terminal output. */
-void print_cities(City *cities, int city_count, int count_to_print)
-{
-    if (cities == NULL)
-    {
-        fprintf(stderr, "Error: cities pointer is NULL\n");
-        return;
-    }
-
-    if (city_count < 0)
-    {
-        fprintf(stderr, "Error: city_count is invalid\n");
-        return;
-    }
-
-    if (count_to_print < 0)
-    {
-        fprintf(stderr, "Error: count_to_print is invalid\n");
-        return;
-    }
-
-    if (count_to_print > city_count)
-    {
-        fprintf(stderr, "Error: count_to_print is superior to city_count\n");
-        return;
-    }
-
-    int i;
-    for (i = 0; i < count_to_print; i++)
-    {
-        printf("%s, %s, %s, %d, %f/%f\n",
-               cities[i].insee_code,
-               cities[i].name,
-               cities[i].region_name,
-               cities[i].population,
-               cities[i].latitude,
-               cities[i].longitude);
-    }
-    printf("End: %d cities displayed on %d\n", count_to_print, city_count);
-}
-
-
-void print_hospital_cities(City** cities_ptr, int city_count, int count_to_print) {
-    int i;
-    int limit;
-    
-    if (cities_ptr == NULL) return;
-
-    /* On s'assure de ne pas dépasser ce qui est disponible */
-    limit = (count_to_print > city_count) ? city_count : count_to_print;
-
-    for (i = 0; i < limit; i++) {
-        /* ICI : On accède via le pointeur -> */
-        printf("  - %s (%d hab.)\n", 
-               cities_ptr[i]->name, 
-               cities_ptr[i]->population);
-    }
-    
-    if (city_count > limit) {
-        printf("  ... and %d more cities.\n", city_count - limit);
-    }
-}
-
-/* Temporary function kept for debugging/preview until UI rendering fully replaces terminal output. */
-void print_neighbor(City city)
-{
-    printf("\nNeighbors for city %s (%d neighbors found):\n", city.name, city.neighbors_size);
-
-    if (city.neighbors == NULL || city.neighbors_size == 0)
-    {
-        printf("  (No neighbors found within %d km)\n", COVERAGE_RADIUS_KM);
-        return;
-    }
-
-    int i;
-    for (i = 0; i < city.neighbors_size; i++)
-    {
-        City *nb = city.neighbors[i].city;
-        double dist = city.neighbors[i].distance;
-
-        printf("%s (Dist: %.2f km)\n", nb->name, dist);
-    }
-    printf("End of neighbors list.\n");
 }

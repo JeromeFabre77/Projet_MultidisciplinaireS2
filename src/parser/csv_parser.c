@@ -6,12 +6,13 @@
 #include "../utils/utils.h"
 
 
-/* 4096 is a safe initial size to read up to 4096 characters before knowing the longest line length
-and resizing the read buffer. */
+
+/* 4096 to be safe and allow up to 4096 characters before knowing the size of the longest line
+and resizing the read buffer */
 #define LINE_READ_CHUNK 4096
 
 /**
- * @brief Open a file in read mode with error checking
+ * @brief Opens a file in read mode with error checking
  * @param path Path to the file to open
  * @return FILE pointer if successful, NULL on failure
  */
@@ -35,12 +36,12 @@ FILE *open_file(const char *path) {
 }
 
 /**
- * @brief Close a file with error checking
+ * @brief Closes a file with error checking
  * @param file FILE pointer to close
  * @return 0 on success, EOF on failure
  */
 int close_file(FILE *file) {
-    /* A NULL pointer is not fatal here: nothing is considered open to close. */
+    /* A NULL pointer is not fatal here: we consider there is nothing to close. */
     if (file == NULL) {
         fprintf(stderr, "Warning: Attempting to close NULL file pointer\n");
         return 0;
@@ -55,7 +56,7 @@ int close_file(FILE *file) {
 }
 
 /**
- * @brief Calcule les statistiques du fichier en un seul passage
+ * @brief Computes file statistics in a single pass
  * @param path Path to the CSV file
  * @param line_count Pointer to store the line count
  * @param max_length Pointer to store the max line length
@@ -97,7 +98,7 @@ int get_file_stats(const char *path, int *line_count, int *max_length) {
 }
 
 /**
- * @brief Parse une ligne CSV et remplit une structure City
+ * @brief Parses a CSV line and fills a City structure
  * @param line The CSV line to parse (format: insee,name,region_code,region_name,dept_code,dept_name,postal_code,population,latitude,longitude)
  * @param city Pointer to City structure to fill
  * @return 0 on success, -1 on failure
@@ -122,13 +123,13 @@ int parse_csv_line(const char *line, City *city) {
 
     strcpy(line_copy, line);
 
-    /* Remove the newline added by fgets. */
+    /* Remove the newline character added by fgets. */
     len = strlen(line_copy);
     if (len > 0 && line_copy[len - 1] == '\n') {
         line_copy[len - 1] = '\0';
     }
 
-    /* Split field by field. */
+    /* Splitting field by field. */
     word = strtok(line_copy, ",");
     field_index = 0;
 
@@ -177,6 +178,7 @@ int parse_csv_line(const char *line, City *city) {
         field_index++;
     }
 
+
     free(line_copy);
     return 0;
 }
@@ -194,7 +196,7 @@ int get_cities_from_csv(const char *path, City **cities) {
     FILE *file;
     int city_index;
 
-    /* Validate inputs and initialize the output. */
+    /* Input validation and output initialization. */
     if (path == NULL || cities == NULL) {
         fprintf(stderr, "Error: path or cities is NULL\n");
         return -1;
@@ -205,22 +207,22 @@ int get_cities_from_csv(const char *path, City **cities) {
     /* First pass: determine the required capacity. */
     line_count = 0;
     max_line_length = 0;
-   
-    get_file_stats(path, &line_count, &max_line_length); 
+   get_file_stats(path, &line_count, &max_line_length);
+        
 
     if (line_count <= 0 || max_line_length <= 0) {
         fprintf(stderr, "Error: Invalid file (empty or invalid)\n");
         return -1;
     }
 
-    /* Allocate the city array. */
+    /* Allocation of the cities array. */
     *cities = city_resize_array(NULL, line_count);
     if (*cities == NULL) {
         fprintf(stderr, "Error: Memory allocation failed for cities array\n");
         return -1;
     }
 
-    /* Dynamic buffer sized for the longest line. */
+    /* Dynamic buffer adapted to the longest line. */
     buffer = (char *)malloc((max_line_length + 1) * sizeof(char));
     if (buffer == NULL) {
         fprintf(stderr, "Error: Memory allocation failed for buffer\n");
@@ -237,7 +239,7 @@ int get_cities_from_csv(const char *path, City **cities) {
         return -1;
     }
 
-    /* Second pass: read and parse each line. */
+    /* Second pass: reading and parsing each line. */
     city_index = 0;
     while (fgets(buffer, max_line_length + 1, file) != NULL && city_index < line_count) {
         if (parse_csv_line(buffer, &(*cities)[city_index]) != 0) {
@@ -248,8 +250,11 @@ int get_cities_from_csv(const char *path, City **cities) {
             close_file(file);
             return -1;
         }
+        (*cities)[city_index].neighbors = NULL; 
+        (*cities)[city_index].neighbors_size = 0; 
         city_index++;
     }
+
 
     free(buffer);
 
@@ -261,3 +266,4 @@ int get_cities_from_csv(const char *path, City **cities) {
 
     return city_index;
 }
+

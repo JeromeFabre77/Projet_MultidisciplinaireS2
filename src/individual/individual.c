@@ -347,3 +347,22 @@ void cross_two_individuals(Individual *child, const Individual *first_parent, co
 
     evaluate_individual(child, cities, cities_size);
 }
+
+
+/**
+ * @brief Crée un nouvel individu en mutant un parent.
+ */
+void mutate_individual(Individual* child, const Individual* parent, City* cities, int cities_size) {
+    if (!child || !parent) return;
+
+    copy_individual(child, parent, cities, cities_size);
+
+    if (child->hospitals_size > 0) {
+        int target_idx = rand() % child->hospitals_size;
+        
+        int new_city_idx = rand() % cities_size;
+        child->hospitals[target_idx].location = &cities[new_city_idx];
+        
+        evaluate_individual(child, cities, cities_size);
+    }
+}

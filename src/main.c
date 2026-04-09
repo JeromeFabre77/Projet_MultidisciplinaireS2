@@ -11,7 +11,7 @@
 
 
 #define NB_GENERATIONS 50 /* The number of generation that the program will process */
-#define INDIVIDUALS_SIZE 100 /* The number of individual for each generation */
+#define INDIVIDUALS_SIZE 200 /* The number of individual for each generation */
 
 #define SELECTION_RATE 0.5 /* The rate of best individuals kept from the previous generation to compute the next generation*/
 #define NB_SELECTED (int)(INDIVIDUALS_SIZE * SELECTION_RATE) /* The number of best indiviuals kept from the previous generation to compute the next generation */
@@ -121,6 +121,15 @@ int main(void)
                                   &current_gen.individuals[parent1_idx], 
                                   &current_gen.individuals[parent2_idx], 
                                   cities, cities_size);
+            current_idx++;
+        }
+
+        for (i = 0; i < NB_MUTAT; i++)
+        {
+            int parent_idx = rand() % NB_SELECTED;
+            mutate_individual(&next_gen.individuals[current_idx], 
+                              &current_gen.individuals[parent_idx], 
+                              cities, cities_size);
             current_idx++;
         }
 

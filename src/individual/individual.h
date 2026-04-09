@@ -31,4 +31,6 @@ void copy_individual(Individual* dest, const Individual* src, City *cities, int 
 
 void cross_two_individuals(Individual *child, const Individual *first_parent, const Individual *second_parent, City *cities, int cities_size);
 
+void mutate_individual(Individual* child, const Individual* parent, City* cities, int cities_size);
+
 #endif

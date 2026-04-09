@@ -1,15 +1,24 @@
+#include <stdio.h>
+#include <stdlib.h>
 #include "interface/interface.h"
+#include "parser/parser.h"
+#include "city/city.h"
 
-int main(int argv, char *argc[])
-{
+int main(void) {
+    City *cities = NULL;
+    int city_count;
 
-    create_window();
+    city_count = get_cities_from_csv("../assets/data/communes-france-metrople-2025.csv", &cities);
 
-    while (1)
-    {
-        actualise_window();
+    if (city_count < 0 || cities == NULL) {
+        fprintf(stderr, "Error: Failed to load cities from CSV\n");
+        return 1;
     }
 
-    free_window();
+    printf("=== First 10 Cities ===\n");
+    print_cities(cities, city_count, 10);
+
+    free(cities);
+
     return 0;
 }

@@ -348,21 +348,177 @@ void cross_two_individuals(Individual *child, const Individual *first_parent, co
     evaluate_individual(child, cities, cities_size);
 }
 
+/**
+ * @brief Check if a city already has a hospital in the individual.
+ *
+ * @param individual The individual to inspect
+ * @param city The city to check
+ *
+ * @return 1 if the city already has a hospital.
+ */
+static int city_already_has_hospital(const Individual *individual, const City *city)
+{
+    if (!individual || !city)
+        return 0;
+
+    int i;
+    for (i = 0; i < individual->hospitals_size; i++)
+    {
+        if (individual->hospitals[i].location == city)
+        {
+            return 1;
+        }
+    }
+
+    return 0;
+}
 
 /**
- * @brief Crée un nouvel individu en mutant un parent.
+ * @brief Remove a hospital from an individual at the given index.
+ *
+ * @param individual The individual to modify
+ * @param index The index of the hospital to remove
+ *
+ * @return void.
  */
-void mutate_individual(Individual* child, const Individual* parent, City* cities, int cities_size) {
-    if (!child || !parent) return;
+static void remove_hospital(Individual *individual, int index)
+{
+    if (!individual || !individual->hospitals)
+        return;
+    if (index < 0 || index >= individual->hospitals_size)
+        return;
+
+    int i;
+    for (i = index; i < individual->hospitals_size - 1; i++)
+    {
+        individual->hospitals[i] = individual->hospitals[i + 1];
+    }
+
+    individual->hospitals_size--;
+
+    if (individual->hospitals_size == 0)
+    {
+        free(individual->hospitals);
+        individual->hospitals = NULL;
+        return;
+    }
+
+    Hospital *tmp = realloc(individual->hospitals, individual->hospitals_size * sizeof(Hospital));
+    if (tmp)
+    {
+        individual->hospitals = tmp;
+    }
+}
+
+/**
+ * @brief Add a hospital to an individual in the given city.
+ *
+ * @param individual The individual to modify
+ * @param city The city where the hospital will be added
+ *
+ * @return 1 if the hospital was added successfully.
+ */
+int add_hospital(Individual *individual, City *city)
+{
+    if (!individual || !city)
+        return 0;
+
+    if (city_already_has_hospital(individual, city))
+    {
+        return 0;
+    }
+
+    Hospital *tmp = realloc(
+        individual->hospitals,
+        (individual->hospitals_size + 1) * sizeof(Hospital));
+
+    if (!tmp)
+    {
+        return 0;
+    }
+
+    individual->hospitals = tmp;
+
+    individual->hospitals[individual->hospitals_size].location = city;
+    /* Initialize other Hospital fields here if needed */
+
+    individual->hospitals_size++;
+
+    return 1;
+}
+
+/**
+ * @brief Create a new individual by mutating a parent individual.
+ *
+ * @param child The individual to create and mutate
+ * @param parent The parent individual to copy before mutation
+ * @param cities The array of all cities
+ * @param cities_size The size of the array of all cities
+ *
+ * @return void.
+ */
+void mutate_individual(Individual *child, const Individual *parent, City *cities, int cities_size)
+{
+    if (!child || !parent || !cities || cities_size <= 0)
+        return;
 
     copy_individual(child, parent, cities, cities_size);
 
-    if (child->hospitals_size > 0) {
-        int target_idx = rand() % child->hospitals_size;
-        
-        int new_city_idx = rand() % cities_size;
-        child->hospitals[target_idx].location = &cities[new_city_idx];
-        
-        evaluate_individual(child, cities, cities_size);
+    float remove_percent = 0.50;
+    float add_percent = 0.50;
+
+    int max_remove = (int)(child->hospitals_size * remove_percent);
+    int max_add = (int)(cities_size * add_percent);
+
+    int remove_count = rand() % (max_remove + 1);
+    int add_count = rand() % (max_add + 1);
+
+    if (remove_count == 0 && add_count == 0)
+    {
+        if (rand() % 2 == 0)
+            remove_count = 1;
+        else
+            add_count = 1;
     }
+
+    if (remove_count > child->hospitals_size)
+    {
+        remove_count = child->hospitals_size;
+    }
+
+    int i;
+    for (i = 0; i < remove_count; i++)
+    {
+        if (child->hospitals_size <= 0)
+            break;
+
+        int remove_idx = rand() % child->hospitals_size;
+        remove_hospital(child, remove_idx);
+    }
+
+    for (i = 0; i < add_count; i++)
+    {
+        if (child->hospitals_size >= cities_size)
+            break;
+
+        int attempts = 0;
+        int added = 0;
+
+        while (attempts < 100 && !added)
+        {
+            int city_idx = rand() % cities_size;
+
+            if (!city_already_has_hospital(child, &cities[city_idx]))
+            {
+                added = add_hospital(child, &cities[city_idx]);
+            }
+
+            attempts++;
+        }
+
+        if (!added)
+            break;
+    }
+
+    evaluate_individual(child, cities, cities_size);
 }

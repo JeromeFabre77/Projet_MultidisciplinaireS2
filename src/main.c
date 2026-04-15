@@ -9,29 +9,24 @@
 #include "generation/generation.h"
 #include "utils/utils.h"
 
-
-#define NB_GENERATIONS 50 /* The number of generation that the program will process */
+#define NB_GENERATIONS 50    /* The number of generation that the program will process */
 #define INDIVIDUALS_SIZE 200 /* The number of individual for each generation */
 
-#define SELECTION_RATE 0.5 /* The rate of best individuals kept from the previous generation to compute the next generation*/
+#define SELECTION_RATE 0.5                                   /* The rate of best individuals kept from the previous generation to compute the next generation*/
 #define NB_SELECTED (int)(INDIVIDUALS_SIZE * SELECTION_RATE) /* The number of best indiviuals kept from the previous generation to compute the next generation */
 
 /* Sum of those params as to be 1 */
-#define ELITE_RATE 0.10 /* The rate of individuals of the next generation that are the best from the previous generation */
+#define ELITE_RATE 0.10                               /* The rate of individuals of the next generation that are the best from the previous generation */
 #define NB_ELITE (int)(INDIVIDUALS_SIZE * ELITE_RATE) /* The number of the individuals of the next generation that are the best from the previous generation */
 
 #define CROSSOVER_RATE 0.50 /* The rate of individuals of the next generation that are crossover between two individuals of the previous generation (selected randomly in the NB_SELECTED bests individuals) */
 #define NB_CROSSOVER (int)(INDIVIDUALS_SIZE * CROSSOVER_RATE)
 
-#define MUTATION_RATE 0.20  /* The rate of individuals of the next generation that are mutation of an individual of the previous generation (selected randomly in the NB_SELECTED bests individuals) */
+#define MUTATION_RATE 0.20 /* The rate of individuals of the next generation that are mutation of an individual of the previous generation (selected randomly in the NB_SELECTED bests individuals) */
 #define NB_MUTAT (int)(INDIVIDUALS_SIZE * MUTATION_RATE)
 
-#define RANDOM_RATE 0.20    /* The rate of individuals of the next generation that are completly random and independant from the previous generation */
+#define RANDOM_RATE 0.20 /* The rate of individuals of the next generation that are completly random and independant from the previous generation */
 #define NB_RND (int)(INDIVIDUALS_SIZE * RANDOM_RATE)
-
-
-
-
 
 int main(void)
 {
@@ -50,7 +45,6 @@ int main(void)
         return 1;
     }
 
-    
     /* Retrieve cities and compute the neighbors */
     City *cities = NULL;
     int cities_size = 0;
@@ -65,7 +59,6 @@ int main(void)
 
     printf("Computing neighbors for each city ...\n");
     compute_city_neighbors(cities, cities_size);
-
 
     /* Genetic algorithm */
 
@@ -117,9 +110,9 @@ int main(void)
             int parent1_idx = rand() % NB_SELECTED;
             int parent2_idx = rand() % NB_SELECTED;
 
-            cross_two_individuals(&next_gen.individuals[current_idx], 
-                                  &current_gen.individuals[parent1_idx], 
-                                  &current_gen.individuals[parent2_idx], 
+            cross_two_individuals(&next_gen.individuals[current_idx],
+                                  &current_gen.individuals[parent1_idx],
+                                  &current_gen.individuals[parent2_idx],
                                   cities, cities_size);
             current_idx++;
         }
@@ -127,8 +120,8 @@ int main(void)
         for (i = 0; i < NB_MUTAT; i++)
         {
             int parent_idx = rand() % NB_SELECTED;
-            mutate_individual(&next_gen.individuals[current_idx], 
-                              &current_gen.individuals[parent_idx], 
+            mutate_individual(&next_gen.individuals[current_idx],
+                              &current_gen.individuals[parent_idx],
                               cities, cities_size);
             current_idx++;
         }
@@ -144,7 +137,7 @@ int main(void)
         for (i = 0; i < INDIVIDUALS_SIZE; i++)
         {
             /* TO DO : free every individual and their content */
-            /* free_individual_internals(&current_gen.individuals[i]);*/ 
+            /* free_individual_internals(&current_gen.individuals[i]);*/
         }
         free(current_gen.individuals);
 

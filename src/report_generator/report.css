@@ -1,18 +1,134 @@
+* {
+  box-sizing: border-box;
+}
+
 body {
-  font-family: "Segoe UI", sans-serif;
   margin: 0;
-  padding: 40px;
-  color: #333;
+  padding: 28px;
+  background: #f5f7fa;
+  color: #1f2937;
+  font-family: "Segoe UI", Arial, sans-serif;
 }
-.content {
-  border: 2px solid #007bff;
-  padding: 20px;
-  border-radius: 10px;
+
+.report-page {
+  max-width: 980px;
+  margin: 0 auto;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 24px;
 }
+
+.report-header {
+  border-bottom: 1px solid #e5e7eb;
+  margin-bottom: 16px;
+  padding-bottom: 14px;
+}
+
 h1 {
-  color: #007bff;
+  margin: 0;
+  font-size: 27px;
+  color: #0f172a;
 }
-/* Force une nouvelle page si nécessaire */
-.page-break {
-  page-break-before: always;
+
+.subtitle {
+  margin: 6px 0 0;
+  color: #475569;
+  font-size: 14px;
+}
+
+.report-section {
+  margin-top: 18px;
+}
+
+h2 {
+  margin: 0 0 12px;
+  font-size: 19px;
+  color: #111827;
+}
+
+h3 {
+  margin: 0 0 10px;
+  font-size: 17px;
+  color: #0f172a;
+}
+
+h4 {
+  margin: 12px 0 8px;
+  font-size: 14px;
+  color: #1f2937;
+}
+
+.context-line {
+  margin: 0 0 12px;
+  color: #64748b;
+  font-size: 13px;
+}
+
+.department-card {
+  border: 1px solid #dfe3ea;
+  border-radius: 10px;
+  padding: 14px;
+  margin-bottom: 14px;
+  background: #fafbfd;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.stat-card {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 10px;
+}
+
+.stat-label {
+  margin: 0 0 6px;
+  color: #475569;
+  font-size: 12px;
+}
+
+.stat-value {
+  margin: 0;
+  color: #0f172a;
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.stat-subvalue {
+  margin: 6px 0 0;
+  color: #475569;
+  font-size: 12px;
+}
+
+.hospital-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.hospital-table th,
+.hospital-table td {
+  text-align: left;
+  padding: 8px 10px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.hospital-table th {
+  background: #f1f5f9;
+  color: #334155;
+  font-weight: 600;
+}
+
+#individual-list {
+  margin: 0;
+  padding-left: 18px;
+}
+
+#individual-list li {
+  margin-bottom: 4px;
 }

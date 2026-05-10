@@ -2,6 +2,7 @@ const puppeteer = require('puppeteer');
 const path = require('path');
 const filesystem = require('fs');
 
+
 const jsonPathArg = process.argv[2];
 if (!jsonPathArg) {
     console.error('Error: No path to the JSON file provided.');
@@ -15,7 +16,7 @@ if (!filesystem.existsSync(DATA_FILE_PATH)) {
     process.exit(1);
 }
 
-const OUTPUT_DIRECTORY = path.join(__dirname, '../../assets/results');
+const OUTPUT_DIRECTORY = path.join(__dirname, '../../assets/data/result');
 if (!filesystem.existsSync(OUTPUT_DIRECTORY)) {
     console.error(`Error: Output direcory not found at ${OUTPUT_DIRECTORY}`);
     process.exit(1);

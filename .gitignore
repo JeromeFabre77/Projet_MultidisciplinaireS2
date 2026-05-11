@@ -1,3 +1,5 @@
 *.o
 projet_multidisciplinaireS2
 node_modules/
+assets/results/*
+.DS_Store

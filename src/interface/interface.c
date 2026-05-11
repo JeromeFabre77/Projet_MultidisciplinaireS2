@@ -1,6 +1,4 @@
 #include "interface.h"
-#include <stdio.h>
-#include <stdlib.h>
 /* =========================================================
  *  PROJECTION UTILITIES
  *
@@ -235,7 +233,7 @@ void draw_stats(Individual *individu, int generation, int city_count, long total
 
     char buf[64];
 
-    int panel_x = (int)(WIDTH * 0.60) + MAP_MARGIN;
+    int panel_x = (int)(WIDTH * STATS_PANEL_WEIGHT) + MAP_MARGIN;
     int panel_w = (int)(WIDTH * 0.38);
     int line_h = (int)(HEIGHT * 0.045);
     int indent = (int)(WIDTH * 0.02);
@@ -314,7 +312,7 @@ void split_window()
 {
     MLV_Color white = MLV_convert_rgba_to_color(255, 255, 255, 255);
     int size_of_line = 3;
-    int x = WIDTH * 0.6;
+    int x = WIDTH * STATS_PANEL_WEIGHT;
     MLV_draw_filled_rectangle(x, 0, size_of_line, HEIGHT, white);
 }
 

@@ -30,6 +30,15 @@
 
 int main(void)
 {
+    City      *cities = NULL;
+    int        cities_size = 0;
+    int        i;
+    int        gen_idx;
+    double     lat_min, lat_max, lon_min, lon_max;
+    long       total_population;
+    Generation current_gen;
+    Generation next_gen;
+
     srand(time(NULL));
 
     /* Check if settings are correct */
@@ -46,8 +55,6 @@ int main(void)
     }
 
     /* Retrieve cities and compute the neighbors */
-    City *cities = NULL;
-    int cities_size = 0;
 
     printf("Parsing CSV file for cities ...\n");
     cities_size = get_cities_from_csv("../assets/data/communes-france-metrople-2025.csv", &cities);
@@ -60,10 +67,25 @@ int main(void)
     printf("Computing neighbors for each city ...\n");
     compute_city_neighbors(cities, cities_size);
 
+    /* Compute bounds for map projection */
+
+    lat_min = cities[0].latitude;
+    lat_max = cities[0].latitude;
+    lon_min = cities[0].longitude;
+    lon_max = cities[0].longitude;
+    compute_bounds(cities, cities_size, &lat_min, &lat_max, &lon_min, &lon_max);
+
+    total_population = 0;
+    for (i = 0; i < cities_size; i++)
+        total_population += cities[i].population;
+
+
+    /* Create window */
+    create_window();
+
     /* Genetic algorithm */
 
     printf("Generate first génération ...\n");
-    Generation current_gen;
     current_gen.number = 1;
     current_gen.individuals = malloc(INDIVIDUALS_SIZE * sizeof(Individual));
     if (current_gen.individuals == NULL)
@@ -72,21 +94,22 @@ int main(void)
         return 1;
     }
 
-    int i;
     for (i = 0; i < INDIVIDUALS_SIZE; i++)
     {
         create_random_individual(&current_gen.individuals[i], cities, cities_size);
     }
 
-    int gen_idx;
     for (gen_idx = 1; gen_idx < NB_GENERATIONS; gen_idx++)
     {
         /* Sort the previous generation */
         qsort(current_gen.individuals, INDIVIDUALS_SIZE, sizeof(Individual), compare_individuals);
         printf("Best score for generation %d: %d\n", gen_idx, current_gen.individuals[0].score);
 
+        /* Display best individual of the generation */
+        display(cities, cities_size, lat_min, lat_max, lon_min, lon_max,
+                &current_gen.individuals[0], gen_idx, total_population);
+
         printf("Generate generation %d based on generation %d ---\n", gen_idx + 1, gen_idx);
-        Generation next_gen;
         next_gen.number = gen_idx + 1;
         next_gen.individuals = malloc(INDIVIDUALS_SIZE * sizeof(Individual));
         if (next_gen.individuals == NULL)

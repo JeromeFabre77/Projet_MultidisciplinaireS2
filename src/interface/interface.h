@@ -23,12 +23,13 @@
 #define CITY_RADIUS 1
 
 /* Hospital dot sizes */
-#define HOSPITAL_RADIUS 5
-#define CHRU_RADIUS     7
+#define HOSPITAL_RADIUS 4
+#define CHRU_RADIUS     4
 
 /* Hospital and CHRU coverage circle colors */
-#define COL_HOSPITAL_RADIUS MLV_rgba(0, 200, 0, 40)
-#define COL_CHRU_RADIUS     MLV_rgba(0, 0, 200, 40)
+#define COL_HOSPITAL_RADIUS MLV_rgba(0, 80, 0, 255)
+#define COL_CHRU_RADIUS     MLV_rgba(0, 0, 80, 255)
+
 
 /* Global font loaded once at create_window */
 extern MLV_Font *g_font;
@@ -79,8 +80,7 @@ void draw_legend(void);
 void draw_scale(double lon_min, double lon_max);
 
 /* Draws the statistics panel on the right side of the window */
-void draw_stats(Individual *individu, int generation,
-                City *cities, int city_count, long total_population,
+void draw_stats(Individual *individu, int generation, int city_count, long total_population,
                 int isolated_cities);
 
 /* Draws all cities and refreshes the display for the current generation */

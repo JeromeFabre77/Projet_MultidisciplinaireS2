@@ -132,17 +132,15 @@ void draw_hospitals(Individual *individu,
     int i;
     int px, py, radius_px;
 
-    /* Convert 10 km coverage radius to pixels */
-    radius_px = (int)(COVERAGE_RADIUS_KM / 75.0 * (MAP_W - 2 * MAP_MARGIN) / (lon_max - lon_min)*0.5);
-
+    radius_px = (int)(COVERAGE_RADIUS_KM / 75.0 * (MAP_W - 2 * MAP_MARGIN) / (lon_max - lon_min) * 0.6);
+    printf("radius_px = %d\n", radius_px);
     /* Pass 1: regular hospitals (green) */
     for (i = 0; i < individu->hospitals_size; i++)
     {
-        if (individu->hospitals[i].is_chru)
-            continue;
+        if (individu->hospitals[i].is_chru) continue;
         px = lon_to_px(individu->hospitals[i].location->longitude, lon_min, lon_max);
-        py = lat_to_py(individu->hospitals[i].location->latitude, lat_min, lat_max);
-        MLV_draw_filled_circle(px, py, radius_px, MLV_rgba(0, 200, 0, 40));
+        py = lat_to_py(individu->hospitals[i].location->latitude,  lat_min, lat_max);
+        MLV_draw_filled_circle(px, py, radius_px, COL_HOSPITAL_RADIUS);
         MLV_draw_circle(px, py, radius_px, MLV_COLOR_GREEN);
         MLV_draw_filled_circle(px, py, HOSPITAL_RADIUS, MLV_COLOR_GREEN);
     }
@@ -150,11 +148,10 @@ void draw_hospitals(Individual *individu,
     /* Pass 2: CHRU on top (blue) */
     for (i = 0; i < individu->hospitals_size; i++)
     {
-        if (!individu->hospitals[i].is_chru)
-            continue;
+        if (!individu->hospitals[i].is_chru) continue;
         px = lon_to_px(individu->hospitals[i].location->longitude, lon_min, lon_max);
-        py = lat_to_py(individu->hospitals[i].location->latitude, lat_min, lat_max);
-        MLV_draw_filled_circle(px, py, radius_px, MLV_rgba(0, 0, 200, 40));
+        py = lat_to_py(individu->hospitals[i].location->latitude,  lat_min, lat_max);
+        MLV_draw_filled_circle(px, py, radius_px, COL_CHRU_RADIUS);
         MLV_draw_circle(px, py, radius_px, MLV_COLOR_BLUE);
         MLV_draw_filled_circle(px, py, CHRU_RADIUS, MLV_COLOR_BLUE);
     }
@@ -233,8 +230,7 @@ static int draw_separator(int x, int y, int line_h, int panel_w, int thickness)
     return y + line_h / 2;
 }
 
-void draw_stats(Individual *individu, int generation,
-                City *cities, int city_count, long total_population, int isolated_cities)
+void draw_stats(Individual *individu, int generation, int city_count, long total_population, int isolated_cities)
 {
 
     char buf[64];
@@ -367,6 +363,6 @@ void display(
     draw_hospitals(individu, lat_min, lat_max, lon_min, lon_max);
     draw_legend();
     draw_scale(lon_min, lon_max);
-    draw_stats(individu, generation, cities, city_count, total_population, isolated_cities);
+    draw_stats(individu, generation,city_count, total_population, isolated_cities);
     MLV_actualise_window();
 }

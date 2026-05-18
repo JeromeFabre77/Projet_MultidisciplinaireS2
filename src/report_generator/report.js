@@ -90,8 +90,8 @@ class Department {
         this.cities.push(city);
     }
 
-    addHospital(cityName, bedCount) {
-        this.hospitals.push({ cityName, bedCount });
+    addHospital(cityName, bedCount, latitude, longitude) {
+        this.hospitals.push({ cityName, bedCount, latitude, longitude });
     }
 
     getTotalPopulation() {
@@ -139,27 +139,20 @@ class ReportGenerator {
 
         // Associer les hôpitaux aux départements
         this.data.individual.hospitals.forEach(hospital => {
-            const cityName = this.cityService.findCityName(
+            // On trouve la ville exacte via les coordonnées de l'hôpital
+            const hostCity = this.cityService.findExact(
                 Number(hospital.location.latitude),
                 Number(hospital.location.longitude)
             );
 
-            // Trouver le département de cet hôpital
-            const cleanName = cityName.replace(' (approx.)', '');
-            let hostCity = this.data.cities.find(c => c.name === cleanName);
-
-            if (!hostCity) {
-                hostCity = this.cityService.findNearest(
-                    Number(hospital.location.latitude),
-                    Number(hospital.location.longitude)
-                );
-            }
-
+            // On ajoute directement au département de la ville trouvée
             if (hostCity) {
                 const dept = deptMap.get(hostCity.dept_code);
                 if (dept) {
-                    dept.addHospital(cityName, hospital.bed_count);
+                    dept.addHospital(hostCity.name, hospital.bed_count, Number(hospital.location.latitude), Number(hospital.location.longitude));
                 }
+            } else {
+                console.warn(`Hôpital ignoré : aucune commune exacte trouvée aux coordonnées ${hospital.location.latitude}, ${hospital.location.longitude}`);
             }
         });
 
@@ -167,16 +160,49 @@ class ReportGenerator {
             .sort((a, b) => String(a.code).localeCompare(String(b.code), 'fr'));
     }
 
-    renderIndividual() {
+    renderGlobalSummary() {
         const { individual } = this.data;
-        const items = [
-            `Score : ${FormatService.formatNumber(individual.score)}`,
-            `Population isolée : ${FormatService.formatNumber(individual.isolated_population)}`,
-            `Nombre de CHRU : ${individual.chru_count}`,
-            `Nombre d'hôpitaux : ${individual.hospitals.length}`
-        ];
-        document.getElementById('individual-list').innerHTML =
-            items.map(item => `<li>${item}</li>`).join('');
+        const totalPop = this.departments.reduce((sum, dept) => sum + dept.getTotalPopulation(), 0);
+        const totalBeds = this.departments.reduce((sum, dept) => sum + dept.getTotalBeds(), 0);
+        
+        const html = `
+            <div class="stats-grid" style="margin-bottom: 12px;">
+                <section class="stat-card">
+                    <p class="stat-label">Score d'évaluation global</p>
+                    <p class="stat-value">${FormatService.formatNumber(individual.score)}</p>
+                    <p class="stat-subvalue">Fonction objectif minimisée</p>
+                </section>
+                <section class="stat-card">
+                    <p class="stat-label">Population totale</p>
+                    <p class="stat-value">${FormatService.formatNumber(totalPop)}</p>
+                    <p class="stat-subvalue">Habitants étudiés</p>
+                </section>
+                <section class="stat-card">
+                    <p class="stat-label">Population isolée non couverte</p>
+                    <p class="stat-value" style="color: #ef4444;">${FormatService.formatNumber(individual.isolated_population)}</p>
+                    <p class="stat-subvalue">${((individual.isolated_population / totalPop) * 100).toFixed(2)}% du total</p>
+                </section>
+            </div>
+            
+            <div class="stats-grid">
+                <section class="stat-card">
+                    <p class="stat-label">Nombre total d'hôpitaux</p>
+                    <p class="stat-value">${FormatService.formatNumber(individual.hospitals.length)}</p>
+                    <p class="stat-subvalue">Infrastructures déployées</p>
+                </section>
+                <section class="stat-card">
+                    <p class="stat-label">Centres Hospitaliers (CHRU)</p>
+                    <p class="stat-value">${FormatService.formatNumber(individual.chru_count)}</p>
+                    <p class="stat-subvalue">Établissements majeurs</p>
+                </section>
+                <section class="stat-card">
+                    <p class="stat-label">Capacité d'accueil globale</p>
+                    <p class="stat-value">${FormatService.formatNumber(totalBeds)}</p>
+                    <p class="stat-subvalue">${FormatService.formatBedRate((totalBeds / totalPop) * 1000)} lits / 1 000 hab.</p>
+                </section>
+            </div>
+        `;
+        document.getElementById('global-stats').innerHTML = html;
     }
 
     renderDepartments() {
@@ -209,6 +235,8 @@ class ReportGenerator {
                             <p class="stat-value">${FormatService.formatBedRate(dept.getBedRate())} lits / 1 000 hab.</p>
                         </section>
                     </div>
+
+                    <div id="map-dept-${dept.code}" class="map-container dept-map"></div>
 
                     <h4>Villes accueillant un hôpital (nombre de lits)</h4>
                     <table class="hospital-table">
@@ -246,8 +274,73 @@ class ReportGenerator {
     }
 
     render() {
-        this.renderIndividual();
+        this.renderGlobalSummary();
         this.renderDepartments();
+        this.renderMaps();
+    }
+
+    renderMaps() {
+        // Paramètres de base pour Leaflet visant à désactiver les animations pour Puppeteer
+        const mapOptions = {
+            zoomControl: false,
+            zoomAnimation: false,
+            fadeAnimation: false,
+            markerZoomAnimation: false
+        };
+
+        // --- 1. Carte globale ---
+        const globalMap = L.map('global-map', mapOptions).setView([46.603354, 1.888334], 5);
+        L.tileLayer('https://{s}.tile.openstreetmap.fr/osmfr/{z}/{x}/{y}.png', {
+            attribution: '&copy; OpenStreetMap France | &copy; OpenStreetMap contributors'
+        }).addTo(globalMap);
+
+        const globalBounds = [];
+        this.data.individual.hospitals.forEach(h => {
+            const lat = Number(h.location.latitude);
+            const lon = Number(h.location.longitude);
+            L.circleMarker([lat, lon], {
+                radius: 4,
+                color: '#2563eb',
+                fillColor: '#3b82f6',
+                fillOpacity: 0.7
+            }).addTo(globalMap);
+            globalBounds.push([lat, lon]);
+        });
+        
+        if (globalBounds.length > 0) {
+            globalMap.fitBounds(globalBounds, { padding: [20, 20], animate: false });
+        }
+
+        // --- 2. Cartes départementales ---
+        this.departments.forEach(dept => {
+            if (dept.hospitals.length === 0) return; // Pas de carte s'il n'y a pas d'hôpitaux
+
+            const mapId = `map-dept-${dept.code}`;
+            const deptMap = L.map(mapId, mapOptions);
+            
+            L.tileLayer('https://{s}.tile.openstreetmap.fr/osmfr/{z}/{x}/{y}.png', {
+                attribution: '&copy; OpenStreetMap France'
+            }).addTo(deptMap);
+
+            const deptBounds = [];
+            dept.hospitals.forEach(h => {
+                L.circleMarker([h.latitude, h.longitude], {
+                    radius: 6,
+                    color: '#ef4444',
+                    fillColor: '#f87171',
+                    fillOpacity: 0.8
+                }).addTo(deptMap);
+                deptBounds.push([h.latitude, h.longitude]);
+            });
+
+            if (deptBounds.length > 0) {
+                if (deptBounds.length === 1) {
+                    deptMap.setView(deptBounds[0], 10);
+                } else {
+                    deptMap.fitBounds(deptBounds, { padding: [10, 10], animate: false });
+                }
+            }
+        });
     }
 }
 

@@ -1,116 +1,122 @@
+#include "hospital.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "hospital.h"
-
-
-#define CHANCES_MIN_TO_PLACE_HOSPITAL 10 /* Percentage minimal of chances to associate an hospital to a city when creating randomly, on 100 */
-#define CHANCES_MAX_TO_PLACE_HOSPITAL 20 /* Percentage maximal of chances to associate an hospital to a city when creating randomly, on 100 */
+#include "../constants.h"
+#include "../utils/utils.h"
 
 /**
- * @brief Initialize an hospital with null or 0 values. It MUST be use after a memory allocation for create an hospital.
- * @param hospital The pointer to the hospital to initialize
+ * @brief Allocates and initializes a new hospital at a given city location.
+ * @param location A pointer to the constant city where the hospital is placed.
+ * @return A pointer to the newly created hospital.
  */
-void init_hospital(Hospital* hospital)
+Hospital *create_new_hospital(const City *location)
 {
-    if (hospital == NULL)
+    check_parameter(location, "create_new_hospital() -> parameter 'location' cannot be NULL");
+
+    Hospital *hospital = malloc(sizeof(Hospital));
+    check_allocation(hospital, "create_new_hospital() -> allocating Hospital struct");
+
+    hospital->location = location;
+    if (location->population >= CHRU_MIN_POPULATION)
     {
-        fprintf(stderr, "Error from init_hospital: hospital is null\n");
-        return;
+        hospital->is_chru = 1;
+    }
+    else
+    {
+        hospital->is_chru = 0;
     }
 
-    hospital->location = NULL;
-    hospital->is_chru = 0;
+    hospital->covered_population = 0;
     hospital->bed_count = 0;
     hospital->cities = NULL;
     hospital->cities_size = 0;
-    hospital->covered_population = 0;
+
+    return hospital;
 }
 
 /**
- * @brief Generate a random array of hospital in cities.
- * 
- * It cross all the cities array and for each city there is a chance associate an hospital to it. This chances is defined 
- * by the settings CHANCES_MIN_TO_PLACE_HOSPITAL and CHANCES_MAX_TO_PLACE_HOSPITAL.
- * 
- * 
- * @param hospitals The pointer to the begin of the hospitals list that will be generated
- * @param hospitals_size The pointer to the size of the hospitals list that will be generated
- * @param cities The array of all cities
- * @param cities_size The size of the array of all cities
+ * @brief Safely frees a hospital structure and its associated resources.
+ * @param hospital A double pointer to the hospital to be freed, which will be set to NULL.
  */
-void create_random_list_of_hospital(Hospital **hospitals, int *hospitals_size, City *cities, int cities_size)
+void free_hospital(Hospital **hospital)
 {
-    if (hospitals == NULL)
+    if (hospital == NULL || *hospital == NULL)
     {
-        fprintf(stderr, "Error from create_random_list_of_hospital : hospitals is null\n");
-        return;
-    }
-    if (hospitals_size == NULL)
-    {
-        fprintf(stderr, "Error from create_random_list_of_hospital : hospitals_size is null\n");
-        return;
-    }
-    if (cities == NULL)
-    {
-        fprintf(stderr, "Error from create_random_list_of_hospital : cities is null\n");
-        return;
-    }
-    if (cities_size <= 0)
-    {
-        fprintf(stderr, "Error from create_random_list_of_hospital : cities_size is 0\n");
         return;
     }
 
-    /* To store temporary indexes of city that will be associate to an hospital */
-    int *selected_indices = malloc(cities_size * sizeof(int));
-    if (selected_indices == NULL)
+    if ((*hospital)->cities != NULL)
     {
-        fprintf(stderr, "Error from create_random_list_of_hospital : Memory allocation failed\n");
-        return;
+        free((*hospital)->cities);
+        (*hospital)->cities = NULL;
     }
 
-    int hospital_count = 0;
-
-    /* Random draw to associate or not an hospital to a city */
-    int i;
-    for (i = 0; i < cities_size; i++)
-    {
-        int draw = rand() % 100;
-        if (draw > CHANCES_MIN_TO_PLACE_HOSPITAL && draw < CHANCES_MAX_TO_PLACE_HOSPITAL)
-        {
-            selected_indices[hospital_count] = i;
-            hospital_count++;
-        }
-    }
-
-    if (hospital_count == 0)
-    {
-        free(selected_indices);
-        fprintf(stderr, "Error from create_random_list_of_hospital : hospital_count is 0, your bounds for creating a random list of hospital are to low\n");
-        return;
-    }
-
-    /* Allocate memory for the hospitals array */
-    *hospitals = malloc(hospital_count * sizeof(Hospital));
-    if (*hospitals == NULL)
-    {
-        free(selected_indices);
-        fprintf(stderr, "Error from create_random_list_of_hospital : Memory allocation failed\n");
-        return;
-    }
-
-    /* Fill the hospitals array */
-    for (i = 0; i < hospital_count; i++)
-    {
-        init_hospital(&((*hospitals)[i]));
-
-        (&((*hospitals)[i]))->location = &cities[selected_indices[i]];
-    }
-
-    free(selected_indices);
-
-    *hospitals_size = hospital_count;
+    free(*hospital);
+    *hospital = NULL;
 }
 
+/**
+ * @brief Calculates the total population covered by a given hospital.
+ * @param hospital A pointer to the constant hospital to analyze.
+ * @return The sum of the populations of all cities covered by the hospital.
+ */
+int count_covered_population_for_hospital(const Hospital *hospital)
+{
+    check_parameter(hospital, "count_covered_population_for_hospital() -> parameter 'hospital' is null");
 
+    int total_covered_population = 0;
+
+    int i;
+    for (i = 0; i < hospital->cities_size; i++)
+    {
+        total_covered_population += hospital->cities[i]->population;
+    }
+
+    return total_covered_population;
+}
+
+/**
+ * @brief Calculates the total number of beds required for a given hospital based on its covered population.
+ * @param hospital A pointer to the constant hospital to analyze.
+ * @return The total number of required beds.
+ */
+int count_bed_count_for_hospital(const Hospital *hospital)
+{
+    check_parameter(hospital, "count_bed_count_for_hospital() -> parameter 'hospital' is null");
+
+    return (hospital->covered_population / 1000) * BED_FOR_POPULATION;
+}
+
+/**
+ * @brief Adds a city to the list of cities covered by a given hospital.
+ * @param hospital A pointer to the hospital structure to modify.
+ * @param city A pointer to the constant city being added to the coverage list.
+ */
+void add_covered_city_to_hospital(Hospital *hospital, const City *city)
+{
+    check_parameter(hospital, "add_covered_city_to_hospital() -> parameter 'hospital' is null");
+    check_parameter(city, "add_covered_city_to_hospital() -> parameter 'city' is null");
+
+    int new_size = hospital->cities_size + 1;
+
+    hospital->cities = realloc(hospital->cities, new_size * sizeof(City *));
+    check_allocation(hospital->cities, "add_covered_city_to_hospital() -> allocating hospital->cities");
+
+    hospital->cities[hospital->cities_size] = city;
+
+    hospital->cities_size = new_size;
+}
+
+/**
+ * @brief Evaluates a hospital by updating its total covered population and required bed count.
+ * @param hospital A pointer to the hospital structure to evaluate and update.
+ */
+void evaluate_hospital(Hospital *hospital)
+{
+    check_parameter(hospital, "evaluate_hospital() -> parameter 'hospital' is null");
+
+    hospital->covered_population = count_covered_population_for_hospital(hospital);
+    hospital->bed_count = count_bed_count_for_hospital(hospital);
+}

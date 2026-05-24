@@ -47,8 +47,8 @@ int count_isolated_cities(City *cities, int city_count, Individual *individu)
 
     /* Mark all cities covered by at least one hospital */
     for (i = 0; i < individu->hospitals_size; i++)
-        for (j = 0; j < individu->hospitals[i].cities_size; j++)
-            covered[individu->hospitals[i].cities[j] - cities] = 1;
+        for (j = 0; j < individu->hospitals[i]->cities_size; j++)
+            covered[individu->hospitals[i]->cities[j] - cities] = 1;
 
     /* Count isolated */
     for (i = 0; i < city_count; i++)
@@ -66,9 +66,9 @@ void compute_individual_stats(Individual *individu, City *cities, int city_count
     long isolated_pop = 0;
 
     for (i = 0; i < individu->hospitals_size; i++)
-        for (j = 0; j < individu->hospitals[i].cities_size; j++)
+        for (j = 0; j < individu->hospitals[i]->cities_size; j++)
         {
-            idx = individu->hospitals[i].cities[j] - cities;
+            idx = individu->hospitals[i]->cities[j] - cities;
             if (idx >= 0 && idx < city_count)
                 covered[idx] = 1;
         }
@@ -132,13 +132,13 @@ void draw_hospitals(Individual *individu,
     int px, py, radius_px;
 
     radius_px = (int)(COVERAGE_RADIUS_KM / 75.0 * (MAP_W - 2 * MAP_MARGIN) / (lon_max - lon_min) * 0.6);
-    printf("radius_px = %d\n", radius_px);
+    /*printf("radius_px = %d\n", radius_px);*/
     /* Pass 1: regular hospitals (green) */
     for (i = 0; i < individu->hospitals_size; i++)
     {
-        if (individu->hospitals[i].is_chru) continue;
-        px = lon_to_px(individu->hospitals[i].location->longitude, lon_min, lon_max);
-        py = lat_to_py(individu->hospitals[i].location->latitude,  lat_min, lat_max);
+        if (individu->hospitals[i]->is_chru) continue;
+        px = lon_to_px(individu->hospitals[i]->location->longitude, lon_min, lon_max);
+        py = lat_to_py(individu->hospitals[i]->location->latitude,  lat_min, lat_max);
         MLV_draw_filled_circle(px, py, radius_px, COL_HOSPITAL_RADIUS);
         MLV_draw_circle(px, py, radius_px, MLV_COLOR_GREEN);
         MLV_draw_filled_circle(px, py, HOSPITAL_RADIUS, MLV_COLOR_GREEN);
@@ -147,9 +147,9 @@ void draw_hospitals(Individual *individu,
     /* Pass 2: CHRU on top (blue) */
     for (i = 0; i < individu->hospitals_size; i++)
     {
-        if (!individu->hospitals[i].is_chru) continue;
-        px = lon_to_px(individu->hospitals[i].location->longitude, lon_min, lon_max);
-        py = lat_to_py(individu->hospitals[i].location->latitude,  lat_min, lat_max);
+        if (!individu->hospitals[i]->is_chru) continue;
+        px = lon_to_px(individu->hospitals[i]->location->longitude, lon_min, lon_max);
+        py = lat_to_py(individu->hospitals[i]->location->latitude,  lat_min, lat_max);
         MLV_draw_filled_circle(px, py, radius_px, COL_CHRU_RADIUS);
         MLV_draw_circle(px, py, radius_px, MLV_COLOR_BLUE);
         MLV_draw_filled_circle(px, py, CHRU_RADIUS, MLV_COLOR_BLUE);
@@ -327,7 +327,7 @@ MLV_Font *g_font = NULL;
 
 void create_window()
 {
-    MLV_create_window_with_default_font("Algorithme génétique de répartiitionnement des hopitaux en france mettropoltiatain hors corse", NULL, WIDTH, HEIGHT, "../assets/fonts/FreeMonoBold.ttf", 22);
+    MLV_create_window_with_default_font("Algorithme génétique de répartitionnement des hopitaux en france metropolitaine hors corse", NULL, WIDTH, HEIGHT, "../assets/fonts/FreeMonoBold.ttf", 22);
     g_font = MLV_load_font(FONT_PATH,FONT_SIZE);
     split_window();
     MLV_actualise_window();

@@ -299,7 +299,7 @@ class ReportGenerator {
             const lat = Number(h.location.latitude);
             const lon = Number(h.location.longitude);
             L.circleMarker([lat, lon], {
-                radius: 4,
+                radius: 1,
                 color: '#2563eb',
                 fillColor: '#3b82f6',
                 fillOpacity: 0.7

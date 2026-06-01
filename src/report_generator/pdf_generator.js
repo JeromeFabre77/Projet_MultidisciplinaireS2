@@ -16,7 +16,7 @@ if (!filesystem.existsSync(DATA_FILE_PATH)) {
     process.exit(1);
 }
 
-const OUTPUT_DIRECTORY = path.join(__dirname, '../../assets/data/result');
+const OUTPUT_DIRECTORY = path.join(__dirname, '../../assets/reports_generated');
 if (!filesystem.existsSync(OUTPUT_DIRECTORY)) {
     console.error(`Error: Output direcory not found at ${OUTPUT_DIRECTORY}`);
     process.exit(1);

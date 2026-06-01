@@ -1,9 +1,7 @@
 *.o
 projet_multidisciplinaireS2
 node_modules/
-assets/results/*
 .DS_Store
 *.vscode
-/assets/results
-node_modules/
-.DS_Store
+/assets/data/saved_individuals/*
+/assets/reports_generated/*

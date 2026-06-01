@@ -86,7 +86,7 @@ int count_bed_count_for_hospital(const Hospital *hospital)
 {
     check_parameter(hospital, "count_bed_count_for_hospital() -> parameter 'hospital' is null");
 
-    return (hospital->covered_population / 1000) * BED_FOR_POPULATION;
+    return ((double)(hospital->covered_population) / 1000) * BED_FOR_POPULATION;
 }
 
 /**

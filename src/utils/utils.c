@@ -4,15 +4,15 @@
 
 #include "utils.h"
 
-#define M_PI 3.1415
-#define EARTH_RADIUS_KM 6371.0
+#include "../constants.h"
+
 
 /**
  * @brief Convert degres to radiants.
  * @param deg is a double.
  * @return A radiant which is a double.
  */
-double deg_to_rad(double deg)
+double deg_to_rad(const double deg)
 {
     return deg * M_PI / 180.0;
 }
@@ -23,7 +23,7 @@ double deg_to_rad(double deg)
  * @param city2 pointer of second city.
  * @return A double that is the distance in Km between the two cities.
  */
-double get_distance_between(City *city1, City *city2)
+double compute_distance_between(const City *city1, const City *city2)
 {
     double lat1 = deg_to_rad(city1->latitude);
     double lon1 = deg_to_rad(city1->longitude);
@@ -45,3 +45,36 @@ double get_distance_between(City *city1, City *city2)
     return EARTH_RADIUS_KM * c;
 }
 
+/**
+ * @brief Check if a memory allocation was successful.
+ * If the pointer is NULL, prints an error message and terminates the program.
+ * @param pointer The pointer to check (typically returned by malloc/calloc).
+ * @param error_message The context or details to display in case of failure.
+ */
+void check_allocation(const void *pointer, const char *error_message)
+{
+    if (pointer == NULL)
+    {
+        fprintf(stderr, "\n--- FATAL ERROR: Memory Allocation Failed ---\n");
+        fprintf(stderr, "Context: %s\n", error_message);
+        fprintf(stderr, "The program will now exit.\n---------------------------------------------\n");
+        exit(EXIT_FAILURE);
+    }
+}
+
+/**
+ * @brief Check if a required function parameter is NULL.
+ * If the parameter is NULL, prints an error message and terminates the program.
+ * @param parameter The pointer/parameter to validate.
+ * @param error_message The context or details to display in case of failure.
+ */
+void check_parameter(const void *parameter, const char *error_message)
+{
+    if (parameter == NULL)
+    {
+        fprintf(stderr, "\n--- FATAL ERROR: Invalid Parameter (NULL) ---\n");
+        fprintf(stderr, "Context: %s\n", error_message);
+        fprintf(stderr, "The program will now exit.\n---------------------------------------------\n");
+        exit(EXIT_FAILURE);
+    }
+}

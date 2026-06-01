@@ -41,6 +41,13 @@ extern MLV_Font *g_font;
 /* Creates and initializes the MLV window */
 void create_window(void);
 
+/**
+ * @brief Free window.
+ *
+ * @return void.
+ */
+void free_window();
+
 /* Computes the geographic bounding box of a city array */
 void compute_bounds(City *cities, int cities_count,
                     double *lat_min, double *lat_max,

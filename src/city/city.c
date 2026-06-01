@@ -8,9 +8,9 @@
 
 /**
  * @brief Compute all the neighbors of all cities and store it in the neighbors array in each city.
- * 
+ *
  * It is based on the COVERAGE_RADIUS_KM.
- * 
+ *
  * @param cities The array of all cities
  * @param cities_size The size of the array of all cities
  */
@@ -52,7 +52,7 @@ void compute_city_neighbors(City *cities, int cities_size)
             if (fabs(cities[j].longitude - cities[i].longitude) > delta_lon)
                 continue;
 
-            double distance = get_distance_between(&cities[i], &cities[j]);
+            double distance = compute_distance_between(&cities[i], &cities[j]);
 
             if (distance <= COVERAGE_RADIUS_KM)
             {
@@ -99,7 +99,7 @@ void compute_city_neighbors(City *cities, int cities_size)
             if (fabs(cities[j].longitude - cities[i].longitude) > delta_lon)
                 continue;
 
-            double distance = get_distance_between(&cities[i], &cities[j]);
+            double distance = compute_distance_between(&cities[i], &cities[j]);
 
             if (distance <= COVERAGE_RADIUS_KM)
             {

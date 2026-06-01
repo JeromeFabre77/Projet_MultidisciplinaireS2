@@ -233,20 +233,20 @@ void save_individual_and_cities_in_JSON(char* filepath, Individual* individual, 
             json_add_key(file, "hospitals");
             json_start_array(file);
             for(i=0; i<individual->hospitals_size; i++) {
-                Hospital hospital = individual->hospitals[i];
+                Hospital* hospital = individual->hospitals[i];
                 json_start_object(file);
                     json_add_key(file, "is_chru");
-                    json_add_int(file, hospital.is_chru, 1);
+                    json_add_int(file, hospital->is_chru, 1);
                     json_add_key(file, "covered_population");
-                    json_add_int(file, hospital.covered_population, 1);
+                    json_add_int(file, hospital->covered_population, 1);
                     json_add_key(file, "bed_count");
-                    json_add_int(file, hospital.bed_count, 1);
+                    json_add_int(file, hospital->bed_count, 1);
                     json_add_key(file, "location");
                     json_start_object(file);
                         json_add_key(file, "latitude");
-                        json_add_double(file, hospital.location->latitude, 1);
+                        json_add_double(file, hospital->location->latitude, 1);
                         json_add_key(file, "longitude");
-                        json_add_double(file, hospital.location->longitude, 0);
+                        json_add_double(file, hospital->location->longitude, 0);
                     json_end_object(file, 0);
                 json_end_object(file, i == individual->hospitals_size-1 ? 0 : 1); /* If it is the last element, has_next has to be 0 */
             }

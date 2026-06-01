@@ -3,10 +3,12 @@
 
 #include "../city/city.h"
 
-double deg_to_rad(double deg);
+double deg_to_rad(const double deg);
 
-double get_distance_between(City *city1, City *city2);
+double compute_distance_between(const City *city1, const City *city2);
 
-City *city_resize_array(City *cities, int city_count);
+void check_allocation(const void *pointer, const char *error_message);
+
+void check_parameter(const void *parameter, const char *error_message);
 
 #endif

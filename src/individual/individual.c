@@ -440,3 +440,113 @@ void print_individual(const Individual *individual)
     printf("covered_population : %d\n", individual->covered_population);
     printf("chru_count : %d\n", individual->chru_count);
 }
+
+/**
+ * @brief Check if an individual already has a hospital at a given city location.
+ *
+ * @param individual The individual to search into.
+ * @param location The city location to check.
+ * @return 1 if the individual has a hospital at this location, 0 otherwise.
+ */
+int contains_hospital_at_location(const Individual *individual, const City *location)
+{
+    check_parameter(individual, "contains_hospital_at_location() -> parameter 'individual' is null");
+    check_parameter(location, "contains_hospital_at_location() -> parameter 'location' is null");
+
+    int i;
+    for (i = 0; i < individual->hospitals_size; i++)
+    {
+        if (individual->hospitals[i]->location == location)
+        {
+            return 1;
+        }
+    }
+
+    return 0;
+}
+
+/**
+ * @brief Cross six individuals by keeping only hospitals shared by at least two parents.
+ *
+ * A hospital is considered the same if it has the same city location pointer.
+ *
+ * @param child The child individual to fill.
+ * @param first_parent The first parent individual.
+ * @param second_parent The second parent individual.
+ * @param third_parent The third parent individual.
+ * @param fourth_parent The fourth parent individual.
+ * @param fifth_parent The fifth parent individual.
+ * @param sixth_parent The sixth parent individual.
+ * @param cities The array of cities.
+ * @param cities_size The size of the cities array.
+ * @param total_population The total population.
+ */
+void cross_six_individuals(
+    Individual *child,
+    const Individual *first_parent,
+    const Individual *second_parent,
+    const Individual *third_parent,
+    const Individual *fourth_parent,
+    const Individual *fifth_parent,
+    const Individual *sixth_parent,
+    const City *cities,
+    const int cities_size,
+    const int total_population)
+{
+    check_parameter(child, "cross_six_individuals() -> parameter 'child' is null");
+    check_parameter(first_parent, "cross_six_individuals() -> parameter 'first_parent' is null");
+    check_parameter(second_parent, "cross_six_individuals() -> parameter 'second_parent' is null");
+    check_parameter(third_parent, "cross_six_individuals() -> parameter 'third_parent' is null");
+    check_parameter(fourth_parent, "cross_six_individuals() -> parameter 'fourth_parent' is null");
+    check_parameter(fifth_parent, "cross_six_individuals() -> parameter 'fifth_parent' is null");
+    check_parameter(sixth_parent, "cross_six_individuals() -> parameter 'sixth_parent' is null");
+    check_parameter(cities, "cross_six_individuals() -> parameter 'cities' is null");
+
+    const Individual *parents[6] = {
+        first_parent,
+        second_parent,
+        third_parent,
+        fourth_parent,
+        fifth_parent,
+        sixth_parent};
+
+    int parent_index;
+    int hospital_index;
+
+    for (parent_index = 0; parent_index < 6; parent_index++)
+    {
+        const Individual *current_parent = parents[parent_index];
+
+        for (hospital_index = 0; hospital_index < current_parent->hospitals_size; hospital_index++)
+        {
+            const City *location = current_parent->hospitals[hospital_index]->location;
+
+            /*
+             * If the hospital has already been added to the child,
+             * it has already been handled.
+             */
+            if (contains_hospital_at_location(child, location))
+            {
+                continue;
+            }
+
+            int count = 0;
+            int compare_index;
+
+            for (compare_index = 0; compare_index < 6; compare_index++)
+            {
+                if (contains_hospital_at_location(parents[compare_index], location))
+                {
+                    count++;
+                }
+            }
+
+            if (count >= 2)
+            {
+                add_hospital_to_individual(child, location);
+            }
+        }
+    }
+
+    evaluate_individual(child, cities, cities_size, total_population);
+}

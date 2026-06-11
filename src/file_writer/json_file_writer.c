@@ -3,6 +3,7 @@
 #include <time.h>
 #include <string.h>
 
+#include "../constants.h"
 #include "file_writer.h"
 
 /**
@@ -51,7 +52,7 @@ void get_filepath(char* buffer) {
     char timestamp[30];
     get_current_datetime(timestamp, sizeof(timestamp));
 
-    strcpy(buffer, RESULT_FOLDER); /* Use strcpy clean the buffer at first insertion in the buffer*/
+    strcpy(buffer, OUTPUT_INDIVIDUAL_JSON_FILE_PATH); /* Use strcpy clean the buffer at first insertion in the buffer*/
     strcat(buffer, "individual_");
     strcat(buffer, timestamp);
     strcat(buffer, ".json");

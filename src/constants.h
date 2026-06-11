@@ -3,11 +3,12 @@
 
 /* SOURCES FILES */
 
-#define PATH_TO_CSV_FILE "../assets/data/communes-france-metrople-2025.csv" /* Path to the csv file containing the cities informations */
+#define PATH_TO_CSV_FILE "../assets/data/communes-france-metrople-2025.csv" /* Path to the csv file containing the cities informations*/
+#define OUTPUT_INDIVIDUAL_JSON_FILE_PATH "../assets/data/saved_individuals/" 
 
 /* GENETIQUE ADJUSTEMENTS */
 
-#define NB_GENERATIONS 100000 /* The number of generation that the program will process */
+#define NB_GENERATIONS 100 /* The number of generation that the program will process */
 #define INDIVIDUALS_SIZE 50   /* The number of individual for each generation */
 
 /* The sum of those has to be equals to the INDIVIDUALS_SIZE */
@@ -20,8 +21,8 @@
 #define CHANCES_MIN_TO_PLACE_HOSPITAL 5 /* Percentage minimal of chances to associate an hospital to a city when creating randomly, on 100 */
 #define CHANCES_MAX_TO_PLACE_HOSPITAL 8 /* Percentage maximal of chances to associate an hospital to a city when creating randomly, on 100 */
 
-#define MUTATION_CHANCES_TO_ADD_NEW 2 /* Percentage to add a new hopsital for each existing hospital, on 100 */
-#define MUTATION_CHANCES_TO_REMOVE 2  /* Percentage to remove the hopsital for each existing hospital, on 100 */
+#define MUTATION_CHANCES_TO_ADD_NEW 1 /* Percentage to add a new hopsital for each existing hospital, on 100 */
+#define MUTATION_CHANCES_TO_REMOVE 1 /* Percentage to remove the hopsital for each existing hospital, on 100 */
 
 #define PENALTY_ISOLATED_POP 1 /* The penalty given for each isolated people in the formula to compute fitness (default is 1) */
 #define PENALTY_HOSPITAL 5000  /* The penalty given for each hospital in the formula to compute the fitness (default is 5000) */

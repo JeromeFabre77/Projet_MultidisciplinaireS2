@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <title>Report</title>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <link rel="stylesheet" href="report.css">
+</head>
+<body>
+    <main class="report-page cover-page">
+        <header class="cover-header">
+            <h1>Rapport Sanitaire National</h1>
+            <p class="subtitle">Couverture Hospitalière et Optimisation des Ressources</p>
+        </header>
+
+        <div class="intro-note">
+            <p><strong>À l'attention de Monsieur le Ministre de la Santé,</strong></p>
+            <p>Ce document dresse un état des lieux de la couverture et de l'accessibilité aux soins hospitaliers sur le territoire. Il expose le résultat de nos simulations algorithmiques visant à évaluer et optimiser le maillage médical. En pointant avec précision l'efficacité de l'allocation actuelle ainsi que les déserts médicaux restants, ce rapport est conçu pour vous livrer les indicateurs clés nécessaires au pilotage de la politique de santé publique.</p>
+        </div>
+
+        <div id="global-stats" class="report-section"></div>
+        <div id="global-map" class="map-container global-map"></div>
+    </main>
+
+    <div class="page-break"></div>
+
+    <main class="report-page">
+        <header class="report-header">
+            <h1>Analyse Détaillée par Département</h1>
+            <p class="subtitle">Présentation des indicateurs hospitaliers locaux</p>
+        </header>
+
+        <div id="department-stats" class="report-section">
+            <div id="stats-content"></div>
+        </div>
+    </main>
+
+    <script src="report.js"></script>
+</body>
+</html>

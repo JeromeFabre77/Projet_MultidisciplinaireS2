@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <math.h>
 #include <time.h>
+#include "file_writer/file_writer.h"
 #include "interface/interface.h"
 #include "parser/parser.h"
 #include "city/city.h"
@@ -149,7 +150,7 @@ int main(void)
                                   current_gen->individuals[parent4_idx],
                                   current_gen->individuals[parent5_idx],
                                   current_gen->individuals[parent6_idx],
-                                  cities, cities_size, total_population);
+                                    cities, cities_size, total_population);
 
             nb_individuals_filled++;
         }
@@ -182,6 +183,15 @@ int main(void)
                 current_gen->individuals[0], current_gen->number, total_population);
     }
 
+    /* save best individual as a json file*/
+    char filepath[100];
+    save_individual_and_cities_in_JSON(filepath, current_gen->individuals[0], cities, cities_size); 
+
+    char command[300]; 
+    strcpy(command, "node report_generator/pdf_generator.js ");
+    strcat(command, filepath); 
+
+    system(command); 
     free_generation(&current_gen); /* Free the very last generation */
 
     /*>> Genetic algorithm */

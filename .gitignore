@@ -3,5 +3,3 @@ projet_multidisciplinaireS2
 node_modules/
 .DS_Store
 *.vscode
-/assets/data/saved_individuals/*
-/assets/reports_generated/*
